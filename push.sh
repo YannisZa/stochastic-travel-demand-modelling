@@ -16,7 +16,7 @@ fi
 git commit -m "$msg"
 
 # Define branch
-$branch=$2
+$branch="$2"
 
 # Push source and build repos.
 git push origin $branch

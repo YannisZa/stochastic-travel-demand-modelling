@@ -11,12 +11,9 @@ git add .
 # Commit changes.
 msg="rebuilding offline site $(date)"
 if [ -n "$*" ]; then
-	msg="$1"
+	msg="$*"
 fi
 git commit -m "$msg"
 
-# Define branch
-$branch="$2"
-
 # Push source and build repos.
-git push origin $branch
+git push origin master

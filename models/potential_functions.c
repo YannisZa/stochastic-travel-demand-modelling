@@ -27,6 +27,7 @@ double potential_stochastic(const double *xx, double *grad, const double *orig, 
     const double delta = theta[2];
     const double gamma = theta[3];
     const double kappa = theta[4];
+    const double epsilon = theta[5];
     const double alpha_inv = 1./alpha;
 
     size_t i, j;
@@ -39,20 +40,27 @@ double potential_stochastic(const double *xx, double *grad, const double *orig, 
     for(i=0; i < nn; ++i)
     {
         for(j = 0; j < mm; ++j)
+            /* wksp[j] = \alpha x_j - \beta c_{ij} */
             wksp[j] = alpha*xx[j] - beta*cost_mat[i*mm + j];
+        /* temp = \log (\sum_{j=1}^{M} exp(\alpha x_j - \beta c_{ij}) */
         temp = logsumexp(wksp, mm);
-        value += -alpha_inv*orig[i]*temp;
+        /* Equation 2.7 */
+        value += -epsilon*alpha_inv*orig[i]*temp;
 
         for(j = 0; j < mm; ++j)
-            grad[j] += -orig[i]*exp(wksp[j] - temp);
+            grad[j] += -epsilon*orig[i]*exp(wksp[j] - temp);
     }
 
     for(j = 0; j < mm; ++j)
     {
+        /* Equation 2.22 */
+        /* temp = \kappa \exp(x_j) */
         temp = kappa*exp(xx[j]);
+        /* value = \kappa \exp(x_j) - \delta x_j*/
         value += temp - delta*xx[j];
         grad[j] += temp - delta;
     }
+
 
     value *= gamma;
     for(int j = 0; j < mm; ++j)
@@ -67,7 +75,8 @@ double potential_deterministic(const double *xx, double *grad, const double *ori
     const double alpha = theta[0];
     const double beta = theta[1];
     const double delta = theta[2];
-    const double kappa = theta[3];
+    const double kappa = theta[4];
+    const double epsilon = theta[5];
     const double alpha_inv = 1./alpha;
 
     size_t i, j;
@@ -82,10 +91,10 @@ double potential_deterministic(const double *xx, double *grad, const double *ori
         for(j = 0; j < mm; ++j)
             wksp[j] = alpha*xx[j] - beta*cost_mat[i*mm + j];
         temp = logsumexp(wksp, mm);
-        value += -alpha_inv*orig[i]*temp;
+        value += -epsilon*alpha_inv*orig[i]*temp;
 
         for(j = 0; j < mm; ++j)
-            grad[j] += -orig[i]*exp(wksp[j] - temp);
+            grad[j] += -epsilon*orig[i]*exp(wksp[j] - temp);
     }
 
     for(j = 0; j < mm; ++j)
@@ -107,6 +116,7 @@ void hessian_stochastic(const double *xx, double *hess, const double *orig, cons
     const double beta = theta[1];
     const double gamma = theta[3];
     const double kappa = theta[4];
+    const double epsilon = theta[5];
 
     size_t i, j, k;
     double temp;
@@ -128,13 +138,13 @@ void hessian_stochastic(const double *xx, double *hess, const double *orig, cons
         for(j = 0; j < mm; ++j)
             for(k = j+1; k < mm; ++k)
             {
-                temp = alpha*orig[i]*wksp[j]*wksp[k];
+                temp = epsilon*alpha*orig[i]*wksp[j]*wksp[k];
                 hess[j*mm + k] += temp;
                 hess[k*mm + j] += temp;
             }
 
         for(j = 0; j < mm; ++j)
-            hess[j*mm + j] += alpha*orig[i]*wksp[j]*(wksp[j] - 1.);
+            hess[j*mm + j] += epsilon*alpha*orig[i]*wksp[j]*(wksp[j] - 1.);
     }
 
     for(j = 0; j < mm; ++j)
@@ -151,7 +161,8 @@ void hessian_deterministic(const double *xx, double *hess, const double *orig, c
 {
     const double alpha = theta[0];
     const double beta = theta[1];
-    const double kappa = theta[2];
+    const double kappa = theta[4];
+    const double epsilon = theta[5];
 
     size_t i, j, k;
     double temp;
@@ -173,13 +184,13 @@ void hessian_deterministic(const double *xx, double *hess, const double *orig, c
         for(j = 0; j < mm; ++j)
             for(k = j+1; k < mm; ++k)
             {
-                temp = alpha*orig[i]*wksp[j]*wksp[k];
+                temp = epsilon*alpha*orig[i]*wksp[j]*wksp[k];
                 hess[j*mm + k] += temp;
                 hess[k*mm + j] += temp;
             }
 
         for(j = 0; j < mm; ++j)
-            hess[j*mm + j] += alpha*orig[i]*wksp[j]*(wksp[j] - 1.);
+            hess[j*mm + j] += epsilon*alpha*orig[i]*wksp[j]*(wksp[j] - 1.);
     }
 
     for(j = 0; j < mm; ++j)

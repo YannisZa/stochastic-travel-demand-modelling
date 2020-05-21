@@ -1,4 +1,3 @@
-
 """
 Wrapper on C code of potential functions
 """
@@ -37,9 +36,9 @@ class UrbanModel():
     origindemand_file = os.path.join(self.data_directory,'origin_demand.txt')
     self.origin_demand = np.loadtxt(origindemand_file)
 
-    # Import true log sizes
-    truelogsizes_file = os.path.join(self.data_directory,'true_log_sizes.txt')
-    self.true_log_sizes = np.loadtxt(truelogsizes_file)
+    # Import initial log sizes
+    initiallogsizes_file = os.path.join(self.data_directory,'initial_log_sizes.txt')
+    self.initial_log_sizes = np.loadtxt(initiallogsizes_file)
 
     # Import N,M
     self.N, self.M = np.shape(self.cost_matrix)
@@ -120,7 +119,7 @@ class UrbanModel():
 
   # Potential function of the likelihood
   def likelihood_value(self,xx,s2_inv:float=100.):
-      diff = xx - self.true_log_sizes
+      diff = xx - self.initial_log_sizes
       grad = s2_inv*diff
       potential = 0.5*s2_inv*np.dot(diff, diff)
       return pot, grad

@@ -1,6 +1,4 @@
-"""
-2D illustration of potential function
-"""
+""" 2D illustration of potential function """
 
 import os
 import sys
@@ -36,6 +34,10 @@ parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 20.,
                     help="Gamma parameter")
 parser.add_argument("-k", "--kappa",nargs='?',type=float,default = 1.,
                     help="Kappa parameter")
+parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
+                    help="Epsilon parameter")
+parser.add_argument("-s", "--show_figure",nargs='?',type=boolean,default = False,
+                    help="Flag for showing resulting figure.")
 parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
                     help="Number of points (n^2) to evaluate potential function")
 args = parser.parse_args()
@@ -60,7 +62,8 @@ beta = args.beta
 delta = args.delta/um.M
 gamma = args.gamma
 kappa = args.kappa + delta*um.M
-theta = np.array([alpha_values[0], beta, delta, gamma, kappa])
+epsilon = args.epsilon
+theta = np.array([alpha_values[0], beta, delta, gamma, kappa, epsilon])
 grid_size = args.grid_size
 space0 = -4.
 space1 = .5
@@ -91,6 +94,11 @@ for k in tqdm(range(len(alpha_values))):
     plt.xticks([])
     plt.yticks([])
 plt.tight_layout()
-#plt.show()
+
+# Show figure if instructed
+if args.show_figure:
+    plt.show()
+
+# Save figure to output
 plt.savefig(os.path.join(rd,'data/output/figures/2d_potential_function.png'))
 print('Figure saved to {}'.format(os.path.join(rd,'data/output/figures/2d_potential_function.png')))

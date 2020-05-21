@@ -98,17 +98,6 @@ class UrbanModel():
                     ctypes.c_size_t,
                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
 
-  # # Define dataset directory
-  # input_path = '../data/input/{}'.format(args.dataset_name)
-  #
-  # # Declare global vars
-  # cost_matrix = np.loadtxt(os.path.join(input_path,'cost_matrix.txt'))
-  # origin_demand = np.loadtxt(os.path.join(input_path,'origin_demand.txt'))
-  # true_log_sizes = np.loadtxt(os.path.join(input_path,'true_log_sizes.txt'))
-  # N, M = np.shape(cost_matrix)
-  # theta_stochastic = np.array([1., 0., .3/M, 100., 1.3])
-  # theta_deterministic = np.array([1., 0., .3/M, 1.3])
-
   # Wrapper for potential function
   def potential_value(self,xx,theta):
       grad = np.zeros(self.M)

@@ -36,7 +36,7 @@ parser.add_argument("-k", "--kappa",nargs='?',type=float,default = 1.,
                     help="Kappa parameter")
 parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
                     help="Epsilon parameter")
-parser.add_argument("-s", "--show_figure",nargs='?',type=boolean,default = False,
+parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
                     help="Flag for showing resulting figure.")
 parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
                     help="Number of points (n^2) to evaluate potential function")
@@ -93,12 +93,26 @@ for k in tqdm(range(len(alpha_values))):
     plt.ylim([space0, space1])
     plt.xticks([])
     plt.yticks([])
-plt.tight_layout()
+    # Extra settings - omit when generating nice plots for reports
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('a = {}'.format(alpha_values[k]))
+    plt.colorbar()
+
+# Extra settings - omit when generating nice plots for reports
+plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gamma,kappa)), y=1.30,x=-1)
+# Use next line when generating nice plots for reports
+# plt.tight_layout()
+
+# Save figure to output
+plt.savefig(os.path.join(rd,'data/output/figures/2d_potential_function.png'))
 
 # Show figure if instructed
 if args.show_figure:
     plt.show()
 
-# Save figure to output
-plt.savefig(os.path.join(rd,'data/output/figures/2d_potential_function.png'))
+# Save parameters to file
+with open(os.path.join(rd,'data/output/figures/2d_potential_function_parameters.json'), 'w') as outfile:
+    json.dump(vars(args), outfile)
+
 print('Figure saved to {}'.format(os.path.join(rd,'data/output/figures/2d_potential_function.png')))

@@ -3,6 +3,16 @@ Wrapper on C code of potential functions
 """
 
 import os
+import sys
+
+# Get current working directory and project root directory
+cwd = os.getcwd()
+rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+if not rd.endswith('stochastic-travel-demand-modelling'):
+    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0],'stochastic-travel-demand-modelling')
+# Append project root directory to path
+sys.path.append(rd)
+
 import ctypes
 import numpy as np
 from numpy.ctypeslib import ndpointer
@@ -17,9 +27,9 @@ class UrbanModel():
     # Define dataset
     self.dataset = dataset
     # Define working directory
-    self.working_directory = wd
+    self.working_directory = rd
     # Define data directory
-    self.data_directory = os.path.join(wd,'data/input/{}'.format(dataset))
+    self.data_directory = os.path.join(rd,'data/input/{}'.format(dataset))
     # Import data
     self.import_data()
     # Load C functions
@@ -32,9 +42,9 @@ class UrbanModel():
     costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
     self.cost_matrix = np.loadtxt(costmatrix_file)
 
-    # Import origin demand
-    origindemand_file = os.path.join(self.data_directory,'origin_demand.txt')
-    self.origin_demand = np.loadtxt(origindemand_file)
+    # Import origin supply
+    originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
+    self.origin_supply = np.loadtxt(originsupply_file)
 
     # Import initial log sizes
     initiallogsizes_file = os.path.join(self.data_directory,'initial_log_sizes.txt')
@@ -102,9 +112,9 @@ class UrbanModel():
       grad = np.zeros(self.M)
       wksp = np.zeros(self.M)
       if self.mode == 'stochastic':
-          value = self.potential_stochastic(xx, grad, self.origin_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.potential_stochastic(xx, grad, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
       else:
-          value = self.potential_deterministic(xx, grad, self.origin_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.potential_deterministic(xx, grad, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
       return (value, grad)
 
   # Wrapper for hessian function
@@ -112,9 +122,9 @@ class UrbanModel():
       A = np.zeros((self.M, self.M))
       wksp = np.zeros(self.M)
       if self.mode == 'stochastic':
-          value = self.hessian_stochastic(xx, A, self.origin_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.hessian_stochastic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
       else:
-          value = self.hessian_deterministic(xx, A, self.origin_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.hessian_deterministic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
       return A
 
   # Potential function of the likelihood

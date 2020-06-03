@@ -54,6 +54,16 @@ class DoublyConstrainedModel():
         # Import N,M
         self.N, self.M = np.shape(self.cost_matrix)
 
+        # Calculate total flow and cost
+        self.total_flow = np.sum(self.origin_supply)
+
+        # Temporarily import full flow matrix to compute total cost
+        actual_flows =  np.loadtxt(os.path.join(self.data_directory,'od_matrix.txt'))
+        self.total_cost = 0
+        for i in range(self.N):
+            for j in range(self.M):
+                self.total_cost += self.cost_matrix[i,j]*actual_flows[i,j]
+
     def store_parameters(self,**params):
         # Define parameters
         self.beta = params['beta']
@@ -66,28 +76,70 @@ class DoublyConstrainedModel():
         # Load shared object
         lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained_model.so"))
 
-        # Load deterministic potential function from shared object
-        self.infer_flows = lib.infer_flows
-        self.infer_flows.restype = ctypes.c_int
-        self.infer_flows.argtypes = [ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                    ctypes.c_size_t,
-                                    ctypes.c_size_t,
-                                    ctypes.c_double,
-                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                    ctypes.c_size_t,
-                                    ctypes.c_bool,
-                                    ctypes.c_bool]
+        # Load DSF procedure flow inference
+        self.infer_flows_dsf_procedure = lib.infer_flows_dsf_procedure
+        self.infer_flows_dsf_procedure.restype = ctypes.c_double
+        self.infer_flows_dsf_procedure.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_double,
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_bool,
+                                                    ctypes.c_bool]
 
-    def flow_inference(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False):
-        ''' Returns flows for given set of parameters and data'''
+
+        # Load DSF procedure flow inference
+        self.infer_flows_newton_raphson = lib.infer_flows_newton_raphson
+        self.infer_flows_newton_raphson.restype = None #ctypes.c_double
+        self.infer_flows_newton_raphson.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_double,
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t]
+
+
+    def flow_inference_dsf_procedure(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False):
+        ''' Returns flows for given set of parameters and data '''
         # Define empty array of flows
-        flows = np.zeros((self.N,self.M)).astype('int32')
+        flows = np.zeros((self.N,self.M)).astype('float64')
 
         # Infer flows
-        value = self.infer_flows(self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,self.beta,flows,self.A,self.B,max_iters,show_params,show_flows)
+        value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,self.beta,max_iters,show_params,show_flows)
 
         return flows
+
+    def flow_inference_newton_raphson(self,max_iters:int = 1000,show_params:bool=False):
+        ''' Returns flows for given set of parameters and data '''
+
+        # Define empty array of flows
+        flows = np.zeros((self.N,self.M)).astype('float64')
+
+        # Define initial \beta if beta array
+        # See suggestion in page 386 of "Gravity Models of Spatial Interaction Behavior" book
+        beta = np.ones((max_iters)) * -1.5 * self.total_flow * (1./self.total_cost)
+
+        # Define initial cost of beta
+        c_beta = np.zeros(max_iters)
+
+        # Infer flows
+        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply,self.destination_demand,self.cost_matrix,self.total_cost,self.N,self.M,max_iters)
+
+        # Trim beta and c_beta arrays if they were not used in full
+        beta = beta[~np.isnan(beta)]
+        c_beta = c_beta[c_beta>=0]
+
+        # Print parameters if requested
+        if show_params:
+            print('\n')
+            print('Beta',beta)
+            print('Cost(beta)',c_beta)
+
+        return flows,beta,c_beta

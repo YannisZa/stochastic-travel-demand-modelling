@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(description='Plot potential function for given 
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input).")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = -13.,
-                    help="Beta parameter.")
+                    help="Beta parameter. Ignore for Newton Raphson method.")
 parser.add_argument("-A", "--A_factor",nargs='?',type=float,default = 1.,
                     help="Initial value for A vector in spatial interaction model. E.g. if A_vector=1, then the A vector is an N-dimensional vector of ones.")
 parser.add_argument("-B", "--B_factor",nargs='?',type=float,default = 1.,
@@ -56,13 +56,18 @@ dc = DoublyConstrainedModel(dataset,beta=args.beta,A_factor=args.A_factor,B_fact
 
 
 ''' Infer flows from model '''
-inferred_flows = dc.flow_inference(max_iterations,show_params,show_flows)
+# inferred_flows = dc.flow_inference_dsf_procedure(max_iterations,show_params,show_flows)
+inferred_flows,_,_ = dc.flow_inference_newton_raphson(max_iterations,show_params)
+
 # Cast flows to integers
 inferred_flows = inferred_flows.astype(int)
 
+# Save array to file
+np.savetxt(os.path.join(rd,'data/output/{}/newton_raphson_flows.txt'.format(dataset)),inferred_flows)
+
 print("\n")
 print('Inferred origin supply:',np.sum(inferred_flows,axis=1))
-print('Inferred destinatin demand:',np.sum(inferred_flows,axis=0))
+print('Inferred destination demand:',np.sum(inferred_flows,axis=0))
 print('Total flow:',np.sum(inferred_flows))
 print("\n")
 
@@ -90,16 +95,14 @@ plt.ylabel("Origin Borough")
 plt.title('Origin demand flows of {} data'.format(dataset), fontsize=20)
 
 # Save figure to output
-plt.savefig(os.path.join(rd,'data/output/{}/figures/inferred_flows.png'.format(dataset)))
-# Save array to file
-np.savetxt(os.path.join(rd,'data/output/{}/c_inferred_flows.txt'.format(dataset)),inferred_flows)
+plt.savefig(os.path.join(rd,'data/output/{}/figures/newton_raphson_flows.png'.format(dataset)))
 
 # Plot figure if requested
 if plot_flows:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(rd,'data/output/{}/figures/inferred_flows_parameters.json'.format(dataset)), 'w') as outfile:
+with open(os.path.join(rd,'data/output/{}/figures/newton_raphson_flows_parameters.json'.format(dataset)), 'w') as outfile:
     json.dump(vars(args), outfile)
 
-print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/figures/inferred_flows.png'.format(dataset))))
+print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/figures/newton_raphson_flows.png'.format(dataset))))

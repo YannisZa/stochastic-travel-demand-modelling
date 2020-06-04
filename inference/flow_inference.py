@@ -31,19 +31,21 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-from models.spatial_interaction import DoublyConstrainedModel
+from models.doubly_constrained.spatial_interaction import DoublyConstrainedModel
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Infer flows for doubly constrained spatial interaction model based on specified method (DSF or Newton Raphson).')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input).")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.0,
-                    help="Beta parameter. Ignore for Newton Raphson method.")
+                    help="Beta parameter. Ignore for Poisson regression method.")
 parser.add_argument("-A", "--A_factor",nargs='?',type=check_positive_float,default = 1.,
-                    help="Initial value for A vector in spatial interaction model. E.g. if A_vector=1, then the A vector is an N-dimensional vector of ones.")
+                    help="Initial value for A vector in spatial interaction model. E.g. if A_vector=1, then the A vector is an N-dimensional vector of ones.\
+                    Ignore for Poisson regression method.")
 parser.add_argument("-B", "--B_factor",nargs='?',type=check_positive_float,default = 1.,
-                    help="Initial value for B vector in spatial interaction model. E.g. if B_vector=1, then the B vector is an M-dimensional vector of ones.")
-parser.add_argument("-m", "--method",nargs='?',type=str,choices=['newton_raphson', 'dsf'],default = "newton_raphson",
+                    help="Initial value for B vector in spatial interaction model. E.g. if B_vector=1, then the B vector is an M-dimensional vector of ones.\
+                    Ignore for Poisson regression method.")
+parser.add_argument("-m", "--method",nargs='?',type=str,choices=['newton_raphson', 'dsf','poisson_regression'],default = "newton_raphson",
                     help="Method used to estimate flows. ")
 parser.add_argument("-id", "--dsf_max_iters",nargs='?',type=check_positive_int,default = 1000,
                     help="Maximum number of iterations of DSF procedure.")
@@ -91,6 +93,8 @@ if method == 'newton_raphson':
     inferred_flows,_,_ = dc.flow_inference_newton_raphson(newton_raphson_max_iters,dsf_max_iters,show_params)
 elif method == 'dsf':
     inferred_flows = dc.flow_inference_dsf_procedure(dsf_max_iters,show_params,show_flows)
+elif method == 'poisson_regression':
+    inferred_flows = dc.flow_inference_poisson_regression()
 
 # Cast flows to integers
 inferred_flows = inferred_flows.astype(int)
@@ -106,9 +110,9 @@ if show_orig_dem:
 print('Total flow:',np.sum(inferred_flows))
 
 ''' Plot heatmap of flows '''
+print('\n')
 print('Plotting flow heatmap')
-# Import borough names
-boroughs = np.loadtxt(os.path.join(rd,'data/input/{}/origins-destinations.txt'.format(dataset)),dtype=str)
+
 # Change font scaling
 sns.set(font_scale=0.8)
 # Set plot size
@@ -118,25 +122,25 @@ flow_heatmap = sns.heatmap(inferred_flows,
                             annot=True,
                             cmap="coolwarm",
                             fmt="d",
-                            xticklabels=boroughs,
-                            yticklabels=boroughs,
+                            xticklabels=dc.destinations,
+                            yticklabels=dc.origins,
                             linewidths=.05)
 # Add x,y axes labels
-plt.xlabel("Destination Borough")
-plt.ylabel("Origin Borough")
+plt.xlabel("Destination")
+plt.ylabel("Origin")
 # Add title
 plt.title('Origin demand flows of {} data'.format(dataset), fontsize=20)
 
 # Save figure to output
-plt.savefig(os.path.join(rd,'data/output/{}/figures/{}_flows.png'.format(dataset,method)))
+plt.savefig(os.path.join(rd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method)))
 
 # Plot figure if requested
 if plot_flows:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(rd,'data/output/{}/figures/{}_flows_parameters.json'.format(dataset,method)), 'w') as outfile:
+with open(os.path.join(rd,'data/output/{}/{}/figures/{}_flows_parameters.json'.format(dataset,method,method)), 'w') as outfile:
     json.dump(vars(args), outfile)
 
-print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/figures/{}_flows.png'.format(dataset,method))))
+print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method))))
 print('\n')

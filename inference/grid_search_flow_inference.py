@@ -34,7 +34,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from models.spatial_interaction import DoublyConstrainedModel
+from models.doubly_constrained.spatial_interaction import DoublyConstrainedModel
 from tqdm import tqdm
 
 # Parse arguments from command line

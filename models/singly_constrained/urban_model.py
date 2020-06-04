@@ -57,7 +57,7 @@ class UrbanModel():
     ''' Loads C functions '''
 
     # Load shared object
-    lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/potential_functions.so"))
+    lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/singly_constrained/potential_functions.so"))
 
     # Load deterministic potential function from shared object
     self.potential_deterministic = lib.potential_deterministic

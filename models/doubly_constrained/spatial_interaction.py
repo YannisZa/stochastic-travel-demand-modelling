@@ -12,12 +12,14 @@ if not rd.endswith('stochastic-travel-demand-modelling'):
 sys.path.append(rd)
 
 import json
+import pysal
+import ctypes
 import argparse
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from models.urban_model import UrbanModel
+
 from tqdm import tqdm
-import ctypes
 from numpy.ctypeslib import ndpointer
 
 class DoublyConstrainedModel():
@@ -38,6 +40,14 @@ class DoublyConstrainedModel():
 
     def import_data(self):
         '''  Data import function '''
+
+        # Import ordered names of origins
+        origins_file = os.path.join(self.data_directory,'origins.txt')
+        self.origins = np.loadtxt(origins_file,dtype=str)
+
+        # Import ordered names of destinations
+        destinations_file = os.path.join(self.data_directory,'destinations.txt')
+        self.destinations = np.loadtxt(destinations_file,dtype=str)
 
         # Import cost matrix
         costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
@@ -66,6 +76,38 @@ class DoublyConstrainedModel():
             for j in range(self.M):
                 self.total_cost += self.cost_matrix[i,j]*self.actual_flows[i,j]
 
+    def reshape_data(self):
+        """ Reshapes data into dataframe for PySAL training
+
+        Returns
+        -------
+        np.array,np.array,np.array,np.array
+            Flows, origin supply, destination demand, cost matrix
+
+        """
+        # Initialise empty dataframe
+        od_data = pd.DataFrame(columns=['Origin','Destination','Cost','Flow','OriginSupply','DestinationDemand'])
+        # Loop over origins and destinations to populate dataframe
+        for i,orig in tqdm(enumerate(self.origins),total=len(self.origins)):
+            for j,dest in enumerate(self.destinations):
+                # Add row properties
+                new_row = pd.Series({"Origin": orig,
+                                     "Destination": dest,
+                                     "Cost": self.cost_matrix[i,j],
+                                     "Flow": self.actual_flows[i,j],
+                                     "OriginSupply": self.origin_supply[i],
+                                     "DestinationDemand":self.destination_demand[j]})
+                # Append row to dataframe
+                od_data = od_data.append(new_row, ignore_index=True)
+
+        # Get flatten data and et column types appropriately
+        flows_flat = od_data.Flow.values.astype('int64')
+        orig_supply_flat = od_data.OriginSupply.values.astype('int64')
+        dest_demand_flat = od_data.DestinationDemand.values.astype('int64')
+        cost_flat = od_data.Cost.values.astype('float64')
+
+        return flows_flat,orig_supply_flat,dest_demand_flat,cost_flat
+
     def store_parameters(self,**params):
         # Define parameters
         self.beta = params['beta']
@@ -76,7 +118,7 @@ class DoublyConstrainedModel():
         ''' Loads C function '''
 
         # Load shared object
-        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained_model.so"))
+        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained/newton_raphson_model.so"))
 
         # Load DSF procedure flow inference
         self.infer_flows_dsf_procedure = lib.infer_flows_dsf_procedure
@@ -149,6 +191,37 @@ class DoublyConstrainedModel():
             print('Cost(beta)',c_beta)
 
         return flows,beta,c_beta
+
+    def flow_inference_poisson_regression(self):
+        """ Infers flow using PySAL's sparse poisson regression
+
+        Returns
+        -------
+        np.array [NxD]
+            Flows inferred from PySAL
+
+        """
+
+        # Reshape data
+        flows_flat,orig_supply_flat,dest_demand_flat,cost_flat = self.reshape_data()
+
+        # Train regression model using PySAL
+        model = pysal.model.spint.Doubly(flows_flat, orig_supply_flat, dest_demand_flat, cost_flat, 'exp')
+
+        # Print optimised parameters
+        print('Optimised parameters---------------------')
+        print('Distance coefficient',model.params[-1:][0])
+        print('y-intercept (constant) = ',model.params[0])
+
+        # Reconstruct inferred flow matrix from model vector
+        pysal_flows = np.zeros((self.N,self.M))
+        for i in range(self.N):
+            for j in range(self.M):
+                pysal_flows[i][j] = model.yhat[i*self.M + j]
+
+        return pysal_flows
+
+
 
     def SRMSE(self,t_hat:np.array):
         '''

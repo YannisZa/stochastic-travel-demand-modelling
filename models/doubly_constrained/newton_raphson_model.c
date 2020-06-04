@@ -33,9 +33,6 @@ double *infer_flows_dsf_procedure(double *flows,
                                 const size_t max_iters,
                                 const bool show_params,
                                 const bool show_flows) {
-    size_t i,ii,j,jj;
-    unsigned int t;
-    double temp;
 
     /*
     orig_supply [array]: supply generated at each origin zone
@@ -48,6 +45,12 @@ double *infer_flows_dsf_procedure(double *flows,
     show_params [boolean]: flag for printing parameter matrices A and B
     show_flows [boolean]: flag for printing flow from each origin to each destination
     */
+
+
+    size_t i,ii,j,jj;
+    unsigned int t;
+    double temp;
+
 
     for(i=0; i<n; i++) {
 

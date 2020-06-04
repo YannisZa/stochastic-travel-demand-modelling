@@ -15,7 +15,7 @@ import json
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from models.urban_model import UrbanModel
+from models.singly_constrained.urban_model import UrbanModel
 from tqdm import tqdm
 
 # Parse arguments from command line

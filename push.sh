@@ -9,7 +9,7 @@ printf "\033[0;32mPushing updates to GitHub...\033[0m\n"
 git add .
 
 # Commit changes.
-msg="rebuilding offline site $(date)"
+msg="commiting to project $(date)"
 if [ -n "$*" ]; then
 	msg="$*"
 fi

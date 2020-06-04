@@ -147,7 +147,7 @@ double cost_of_beta(double *flows,
   double c_beta = 0;
   for(i=0; i<n; i++) {
       for(j=0; j<m; j++) {
-        c_beta += cost_mat[i*m + j] * flows[i*m + j];
+        c_beta += cost_mat[i*m + j] * dsf_flows[i*m + j];
       }
   }
   return c_beta;
@@ -165,7 +165,8 @@ void infer_flows_newton_raphson(double *flows,
                                 const double total_cost,
                                 const size_t n,
                                 const size_t m,
-                                const size_t max_iters) {
+                                const size_t dsf_max_iters,
+                                const size_t newton_raphson_max_iters) {
     size_t i,j;
     int r;
     double num,denum,temp;
@@ -181,10 +182,16 @@ void infer_flows_newton_raphson(double *flows,
     max_iters [int]: maximum iterations for which system of equations should be solved
     */
 
-   // Initialise C(\beta) array
-   for(r=0; r<max_iters; r++) {
+    // Initialise C(\beta) array
+    for(r=0; r<newton_raphson_max_iters; r++) {
      c_beta[r] = -1.0;
-   }
+    }
+
+    // printf("Initial flows");
+    // printf("\n");
+    // printf("Flow[3,3]: ");
+    // printf("%f",flows[i*3 + 3]);
+    // printf("\n");
 
     // Compute C(\beta^{(0)})
     c_beta[0] = cost_of_beta(flows,
@@ -194,40 +201,46 @@ void infer_flows_newton_raphson(double *flows,
                               n,
                               m,
                               beta[0],
-                              max_iters);
+                              dsf_max_iters);
 
     // Compute \beta^{(1)} = \beta^{(0)} C(\beta^{(0)})/C
     beta[1] = beta[0] * c_beta[0] * (1. / total_cost);
 
     // Compute \beta^{(r)} , C(\beta^{(r)}) for r = 2,3,...
-    for(r=2; r<max_iters; r++) {
-      printf("Iteration:  ");
-      printf("%d",r);
-      printf(" / ");
-      printf("%zu",max_iters);
-      printf("\n");
+    for(r=2; r<newton_raphson_max_iters; r++) {
+        printf("Iteration:  ");
+        printf("%d",r);
+        printf(" / ");
+        printf("%zu",newton_raphson_max_iters);
+        printf("\n");
 
-      // Update C(\beta^{(r-1)}), C(\beta^{(r-2)}) if necessary
-      if (c_beta[r-1] == -1.0) {
-        c_beta[r-1] = cost_of_beta(flows,
-                                  orig_supply,
-                                  dest_demand,
-                                  cost_mat,
-                                  n,
-                                  m,
-                                  beta[r-1],
-                                  max_iters);
-      }
-      if (c_beta[r-2] == -1.0) {
-        c_beta[r-2] = cost_of_beta(flows,
-                                  orig_supply,
-                                  dest_demand,
-                                  cost_mat,
-                                  n,
-                                  m,
-                                  beta[r-2],
-                                  max_iters);
-      }
+        // Update C(\beta^{(r-1)}), C(\beta^{(r-2)}) if necessary
+        if (c_beta[r-1] == -1.0) {
+          c_beta[r-1] = cost_of_beta(flows,
+                                    orig_supply,
+                                    dest_demand,
+                                    cost_mat,
+                                    n,
+                                    m,
+                                    beta[r-1],
+                                    dsf_max_iters);
+        }
+        if (c_beta[r-2] == -1.0) {
+          c_beta[r-2] = cost_of_beta(flows,
+                                    orig_supply,
+                                    dest_demand,
+                                    cost_mat,
+                                    n,
+                                    m,
+                                    beta[r-2],
+                                    dsf_max_iters);
+        }
+        // printf("After iteration r = ");
+        // printf("%d",r);
+        // printf("\n");
+        // printf("Flow[3,3]: ");
+        // printf("%f",flows[i*3 + 3]);
+        // printf("\n");
 
       // Update \beta^{(r)}
 
@@ -257,10 +270,17 @@ void infer_flows_newton_raphson(double *flows,
                                       n,
                                       m,
                                       beta[r],
-                                      max_iters,
+                                      dsf_max_iters,
                                       false,
                                       false);
 
-
+    // printf("Resulting flows");
+    // printf("\n");
+    // printf("Flow[3,3]: ");
+    // printf("%f",flows[i*3 + 3]);
+    // printf("\n");
+    // printf("DSF_Flow[3,3]: ");
+    // printf("%f",dsf_flows[i*3 + 3]);
+    // printf("\n");
 
 }

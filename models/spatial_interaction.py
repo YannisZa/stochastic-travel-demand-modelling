@@ -57,12 +57,14 @@ class DoublyConstrainedModel():
         # Calculate total flow and cost
         self.total_flow = np.sum(self.origin_supply)
 
-        # Temporarily import full flow matrix to compute total cost
-        actual_flows =  np.loadtxt(os.path.join(self.data_directory,'od_matrix.txt'))
+        # Import full flow matrix to compute total cost
+        self.actual_flows =  np.loadtxt(os.path.join(self.data_directory,'od_matrix.txt'))
+
+        # Compute total cost
         self.total_cost = 0
         for i in range(self.N):
             for j in range(self.M):
-                self.total_cost += self.cost_matrix[i,j]*actual_flows[i,j]
+                self.total_cost += self.cost_matrix[i,j]*self.actual_flows[i,j]
 
     def store_parameters(self,**params):
         # Define parameters
@@ -103,34 +105,38 @@ class DoublyConstrainedModel():
                                                     ctypes.c_double,
                                                     ctypes.c_size_t,
                                                     ctypes.c_size_t,
+                                                    ctypes.c_size_t,
                                                     ctypes.c_size_t]
 
 
     def flow_inference_dsf_procedure(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False):
         ''' Returns flows for given set of parameters and data '''
         # Define empty array of flows
-        flows = np.zeros((self.N,self.M)).astype('float64')
+        flows = np.ones((self.N,self.M)).astype('float64')
 
         # Infer flows
         value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,self.beta,max_iters,show_params,show_flows)
 
         return flows
 
-    def flow_inference_newton_raphson(self,max_iters:int = 1000,show_params:bool=False):
+    def flow_inference_newton_raphson(self,newton_raphson_max_iters:int = 100,dsf_max_iters:int = 1000,show_params:bool=False):
         ''' Returns flows for given set of parameters and data '''
 
         # Define empty array of flows
-        flows = np.zeros((self.N,self.M)).astype('float64')
+        flows = np.ones((self.N,self.M)).astype('float64')
 
-        # Define initial \beta if beta array
-        # See suggestion in page 386 of "Gravity Models of Spatial Interaction Behavior" book
-        beta = np.ones((max_iters)) * -1.5 * self.total_flow * (1./self.total_cost)
+        # Define initial \beta if beta is not zero (default value)
+        if self.beta == 0:
+            # See suggestion in page 386 of "Gravity Models of Spatial Interaction Behavior" book
+            beta = np.ones((newton_raphson_max_iters)) * 1.5 * self.total_flow * (1./self.total_cost)
+        else:
+            beta = np.ones((newton_raphson_max_iters)) * self.beta
 
         # Define initial cost of beta
-        c_beta = np.zeros(max_iters)
+        c_beta = np.zeros(newton_raphson_max_iters)
 
         # Infer flows
-        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply,self.destination_demand,self.cost_matrix,self.total_cost,self.N,self.M,max_iters)
+        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply,self.destination_demand,self.cost_matrix,self.total_cost,self.N,self.M,dsf_max_iters,newton_raphson_max_iters)
 
         # Trim beta and c_beta arrays if they were not used in full
         beta = beta[~np.isnan(beta)]
@@ -143,3 +149,14 @@ class DoublyConstrainedModel():
             print('Cost(beta)',c_beta)
 
         return flows,beta,c_beta
+
+    def SRMSE(self,t_hat:np.array):
+        '''
+        Computes standardised root mean square error. See equation (22) of
+        "A primer for working with the Spatial Interaction modeling (SpInt) module
+        in the python spatial analysis library (PySAL)" for more details.
+
+        [t] : actual/true flows
+        [that] : estimated flows
+        '''
+        return ((np.sum((self.actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (self.total_flow / (self.N*self.M))

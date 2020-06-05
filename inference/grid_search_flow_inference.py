@@ -7,13 +7,40 @@ The search is performed over betas and not over A_factor and/or B_factor
 import os
 import sys
 
+import json
+import argparse
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from tqdm import tqdm
+
 # Get current working directory and project root directory
-cwd = os.getcwd()
-rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
-if not rd.endswith('stochastic-travel-demand-modelling'):
-    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0],'stochastic-travel-demand-modelling')
+def get_project_root():
+    """ Returns project's root working directory (entire path).
+
+    Returns
+    -------
+    string
+        Path to project's root directory.
+
+    """
+    # Get current working directory
+    cwd = os.getcwd()
+    # Remove all children directories
+    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+    # Make sure directory ends with project's name
+    if not rd.endswith('stochastic-travel-demand-modelling'):
+        rd = os.path.join(rd,'stochastic-travel-demand-modelling/')
+
+    return rd
+
 # Append project root directory to path
-sys.path.append(rd)
+sys.path.append(get_project_root())
+# Import module that couldn't be imported before
+from models.doubly_constrained.spatial_interaction import DoublyConstrainedModel
+
+
 
 # Ensure positivity of arguments
 def check_positive(value,type):
@@ -28,14 +55,6 @@ def check_positive_float(value):
     return check_positive(ivalue,'float')
 
 
-import json
-import argparse
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from models.doubly_constrained.spatial_interaction import DoublyConstrainedModel
-from tqdm import tqdm
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Infer flows for doubly constrained spatial interaction model using a grid search and the DSF procedure\
@@ -118,8 +137,11 @@ grid_inferred_flows_df = pd.DataFrame.from_dict(grid_inferred_flows)
 # Take transpose
 grid_inferred_flows_df = grid_inferred_flows_df.transpose()
 
+# Get project directory
+wd = get_project_root()
+
 # Save grid to file
-grid_inferred_flows_df.to_csv(os.path.join(rd,'data/output/{}/dsf_grid_srmes.csv'.format(dataset)))
+grid_inferred_flows_df.to_csv(os.path.join(wd,'data/output/{}/dsf_grid_srmes.csv'.format(dataset)))
 
 if show_params:
     print("\n")
@@ -128,5 +150,5 @@ if show_params:
     print("\n")
 
 
-print('Data saved to {}'.format(os.path.join(rd,'data/output/{}/dsf_grid_srmes.csv'.format(dataset))))
+print('Data saved to {}'.format(os.path.join(wd,'data/output/{}/dsf_grid_srmes.csv'.format(dataset))))
 print('\n')

@@ -1,16 +1,6 @@
-""" Maximum entropy flow for doubly constrained origin-destination model """
+""" Inferring flow for doubly constrained origin-destination model using various methods. """
 
 import os
-import sys
-
-# Get current working directory and project root directory
-cwd = os.getcwd()
-rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
-if not rd.endswith('stochastic-travel-demand-modelling'):
-    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0],'stochastic-travel-demand-modelling')
-# Append project root directory to path
-sys.path.append(rd)
-
 import json
 import pysal
 import ctypes
@@ -22,15 +12,44 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from numpy.ctypeslib import ndpointer
 
+
 class DoublyConstrainedModel():
+    """ Object including flow (O/D) matrix inference routines.
+
+    Parameters
+    ----------
+    dataset : str
+        Name of dataset used for inference.
+    **params : type
+        beta [float]
+            Distance coefficient.
+        A [float]
+            Initial value for origin effects - used to initialise flows.
+        B [float]
+            Initial value for destination effects - used to initialise flows.
+
+    Attributes
+    ----------
+    working_directory : string
+        Project's root working directory.
+    data_directory : string
+        Project's data directory.
+    load_c_functions : function
+        Loads relevant C functions for inference.
+    import_data : function
+        Loads relevant data for inference.
+    store_parameters : function
+        Stores relevant parameters for inference.
+
+    """
 
     def __init__(self,dataset:str,**params):
         '''  Constructor '''
 
         # Define working directory
-        self.working_directory = rd
+        self.working_directory = self.get_project_root()
         # Define data directory
-        self.data_directory = os.path.join(rd,'data/input/{}'.format(dataset))
+        self.data_directory = os.path.join(self.working_directory,'data/input/{}'.format(dataset))
         # Load C function
         self.load_c_functions()
         # Import data
@@ -38,8 +57,52 @@ class DoublyConstrainedModel():
         # Store parameters
         self.store_parameters(**params)
 
+    # Get current working directory and project root directory
+    def get_project_root(self):
+        """ Returns project's root working directory (entire path).
+
+        Returns
+        -------
+        string
+            Path to project's root directory.
+
+        """
+        # Get current working directory
+        cwd = os.getcwd()
+        # Remove all children directories
+        rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+        # Make sure directory ends with project's name
+        if not rd.endswith('stochastic-travel-demand-modelling'):
+            rd = os.path.join(rd,'stochastic-travel-demand-modelling/')
+
+        return rd
+
     def import_data(self):
-        '''  Data import function '''
+        """ Stores important data for training and validation to global variables.
+
+        Attributes
+        -------
+        origins [Nx1 array]
+            Names of origin zones.
+        destinations [Mx1 array]
+            Names of destination zones.
+        cost_matrix [NxM array]
+            Cost of travelling from each origin to each destination.
+        origin supply [Nx1 array]
+            Total supply for each origin.
+        destination demand [Mx1 array]
+            Total demand for each destination.
+        N [int]
+            Number of origin zones.
+        M [int]
+            Number of destination zones.
+        total_flow [int]
+            Total flow from every origin to every destination.
+        actual_flows [np.array]
+            Actual flow (O/D) matrix.
+        total_cost [float]
+            Total cost from every origin to every destination.
+        """
 
         # Import ordered names of origins
         origins_file = os.path.join(self.data_directory,'origins.txt')
@@ -77,13 +140,18 @@ class DoublyConstrainedModel():
                 self.total_cost += self.cost_matrix[i,j]*self.actual_flows[i,j]
 
     def reshape_data(self):
-        """ Reshapes data into dataframe for PySAL training
+        """ Reshapes data into dataframe for PySAL training.
 
         Returns
         -------
-        np.array,np.array,np.array,np.array
-            Flows, origin supply, destination demand, cost matrix
-
+        np.array
+            Flows.
+        np.array
+            Origin supply.
+        np.array
+            Destination demand.
+        np.array
+            Cost matrix.
         """
         # Initialise empty dataframe
         od_data = pd.DataFrame(columns=['Origin','Destination','Cost','Flow','OriginSupply','DestinationDemand'])
@@ -109,13 +177,38 @@ class DoublyConstrainedModel():
         return flows_flat,orig_supply_flat,dest_demand_flat,cost_flat
 
     def store_parameters(self,**params):
+        """ Stores parameter values to global variables
+
+        Parameters
+        ----------
+        **params : type
+            Description of parameter `**params`.
+
+        Attributes
+        -------
+        beta [float]
+            Distance coefficient.
+        A [float]
+            Initial value for origin effects - used to initialise flows.
+        B [float]
+            Initial value for destination effects - used to initialise flows.
+
+        """
         # Define parameters
         self.beta = params['beta']
         self.A = np.ones(self.N) * params['A_factor']
         self.B = np.ones(self.M) * params['B_factor']
 
     def load_c_functions(self):
-        ''' Loads C function '''
+        """ Stores C functions that infer flows to global variables.
+
+        Attributes
+        -------
+        infer_flows_dsf_procedure [function]
+            Function used to infer flows using the DSF procedure.
+        infer_flows_newton_raphson [function]
+            Function used to infer flows using the Newton Raphson method.
+        """
 
         # Load shared object
         lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained/newton_raphson_model.so"))
@@ -152,7 +245,23 @@ class DoublyConstrainedModel():
 
 
     def flow_inference_dsf_procedure(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False):
-        ''' Returns flows for given set of parameters and data '''
+        """ Computes flows using the DSF procedure for given set of parameters and data.
+
+        Parameters
+        ----------
+        max_iters : int
+            Maximum number of iterations to run the DSF procedure.
+        show_params : bool
+            Flag for printing the inferred parameter values during inference.
+        show_flows : bool
+            Flag for printing the inferred flows during inference.
+
+        Returns
+        -------
+        np.array [NxM]
+            Flows inferred from the DSF procedure.
+
+        """
         # Define empty array of flows
         flows = np.ones((self.N,self.M)).astype('float64')
 
@@ -162,7 +271,27 @@ class DoublyConstrainedModel():
         return flows
 
     def flow_inference_newton_raphson(self,newton_raphson_max_iters:int = 100,dsf_max_iters:int = 1000,show_params:bool=False):
-        ''' Returns flows for given set of parameters and data '''
+        """ Computes flows using the Newton Raphson procedure for given set of parameters and data.
+        This function makes regular calls to the DSF procedure.
+
+        Parameters
+        ----------
+        newton_raphson_max_iters : int
+            Maximum number of iterations to run the Newton Raphson procedure.
+        dsf_max_iters : int
+            Maximum number of iterations to run the DSF procedure.
+        show_params : bool
+            Flag for printing the inferred parameter values during inference.
+
+        Returns
+        -------
+        np.array [NxM]
+            Flows inferred from the Newton Raphson procedure.
+        np.array [newton_raphson_max_iters x 1]
+            Inferred beta parameters (including initial value at position 0).
+        np.array [newton_raphson_max_iters x 1]
+            Inferred cost of beta parameters (they have to be monotonic).
+        """
 
         # Define empty array of flows
         flows = np.ones((self.N,self.M)).astype('float64')
@@ -219,17 +348,24 @@ class DoublyConstrainedModel():
             for j in range(self.M):
                 pysal_flows[i][j] = model.yhat[i*self.M + j]
 
-        return pysal_flows
+        return pysal_flows,model
 
 
 
     def SRMSE(self,t_hat:np.array):
-        '''
-        Computes standardised root mean square error. See equation (22) of
+        """ Computes standardised root mean square error. See equation (22) of
         "A primer for working with the Spatial Interaction modeling (SpInt) module
         in the python spatial analysis library (PySAL)" for more details.
 
-        [t] : actual/true flows
-        [that] : estimated flows
-        '''
+        Parameters
+        ----------
+        t_hat : np.array [NxM]
+            Estimated flows.
+
+        Returns
+        -------
+        float
+            Standardised root mean square error of t_hat.
+
+        """
         return ((np.sum((self.actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (self.total_flow / (self.N*self.M))

@@ -4,12 +4,27 @@ import os
 import sys
 
 # Get current working directory and project root directory
-cwd = os.getcwd()
-rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
-if not rd.endswith('stochastic-travel-demand-modelling'):
-    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0],'stochastic-travel-demand-modelling')
+def get_project_root():
+    """ Returns project's root working directory (entire path).
+
+    Returns
+    -------
+    string
+        Path to project's root directory.
+
+    """
+    # Get current working directory
+    cwd = os.getcwd()
+    # Remove all children directories
+    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+    # Make sure directory ends with project's name
+    if not rd.endswith('stochastic-travel-demand-modelling'):
+        rd = os.path.join(rd,'stochastic-travel-demand-modelling/')
+
+    return rd
+
 # Append project root directory to path
-sys.path.append(rd)
+sys.path.append(get_project_root())
 
 # Ensure positivity of arguments
 def check_positive(value,type):
@@ -38,7 +53,7 @@ parser = argparse.ArgumentParser(description='Infer flows for doubly constrained
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input).")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.0,
-                    help="Beta parameter. Ignore for Poisson regression method.")
+                    help="Beta parameter - distance coefficient. Ignore for Poisson regression method.")
 parser.add_argument("-A", "--A_factor",nargs='?',type=check_positive_float,default = 1.,
                     help="Initial value for A vector in spatial interaction model. E.g. if A_vector=1, then the A vector is an N-dimensional vector of ones.\
                     Ignore for Poisson regression method.")
@@ -94,13 +109,16 @@ if method == 'newton_raphson':
 elif method == 'dsf':
     inferred_flows = dc.flow_inference_dsf_procedure(dsf_max_iters,show_params,show_flows)
 elif method == 'poisson_regression':
-    inferred_flows = dc.flow_inference_poisson_regression()
+    inferred_flows,_ = dc.flow_inference_poisson_regression()
 
 # Cast flows to integers
 inferred_flows = inferred_flows.astype(int)
 
+# Get project directory
+wd = get_project_root()
+
 # Save array to file
-np.savetxt(os.path.join(rd,'data/output/{}/{}_flows.txt'.format(dataset,method)),inferred_flows)
+np.savetxt(os.path.join(wd,'data/output/{}/{}_flows.txt'.format(dataset,method)),inferred_flows)
 
 if show_orig_dem:
     print("\n")
@@ -132,15 +150,15 @@ plt.ylabel("Origin")
 plt.title('Origin demand flows of {} data'.format(dataset), fontsize=20)
 
 # Save figure to output
-plt.savefig(os.path.join(rd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method)))
+plt.savefig(os.path.join(wd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method)))
 
 # Plot figure if requested
 if plot_flows:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(rd,'data/output/{}/{}/figures/{}_flows_parameters.json'.format(dataset,method,method)), 'w') as outfile:
+with open(os.path.join(wd,'data/output/{}/{}/figures/{}_flows_parameters.json'.format(dataset,method,method)), 'w') as outfile:
     json.dump(vars(args), outfile)
 
-print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method))))
+print('Figure saved to {}'.format(os.path.join(wd,'data/output/{}/{}/figures/{}_flows.png'.format(dataset,method,method))))
 print('\n')

@@ -2,21 +2,36 @@
 
 import os
 import sys
-
-# Get current working directory and project root directory
-cwd = os.getcwd()
-rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
-if not rd.endswith('stochastic-travel-demand-modelling'):
-    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0],'stochastic-travel-demand-modelling')
-# Append project root directory to path
-sys.path.append(rd)
-
 import json
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from models.singly_constrained.urban_model import UrbanModel
 from tqdm import tqdm
+
+# Get current working directory and project root directory
+def get_project_root():
+    """ Returns project's root working directory (entire path).
+
+    Returns
+    -------
+    string
+        Path to project's root directory.
+
+    """
+    # Get current working directory
+    cwd = os.getcwd()
+    # Remove all children directories
+    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+    # Make sure directory ends with project's name
+    if not rd.endswith('stochastic-travel-demand-modelling'):
+        rd = os.path.join(rd,'stochastic-travel-demand-modelling/')
+
+    return rd
+
+# Append project root directory to path
+sys.path.append(get_project_root())
+# Import module that couldn't be imported before
+from models.singly_constrained.urban_model import UrbanModel
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
@@ -49,8 +64,11 @@ dataset = args.dataset_name
 # Define mode (stochastic/determinstic)
 mode = args.mode
 
+# Get project directory
+wd = get_project_root()
+
 # Instantiate UrbanModel
-um = UrbanModel(mode,dataset,rd)
+um = UrbanModel(mode,dataset)
 
 # Setup 2D model
 um.cost_matrix = um.cost_matrix[:,:2]/um.cost_matrix[:,:2].sum()
@@ -105,14 +123,14 @@ plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gam
 # plt.tight_layout()
 
 # Save figure to output
-plt.savefig(os.path.join(rd,'data/output/{}/figures/2d_potential_function.png'.format(dataset)))
+plt.savefig(os.path.join(wd,'data/output/{}/figures/2d_potential_function.png'.format(dataset)))
 
 # Show figure if instructed
 if args.show_figure:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(rd,'data/output/{}/figures/2d_potential_function_parameters.json'.format(dataset)), 'w') as outfile:
+with open(os.path.join(wd,'data/output/{}/figures/2d_potential_function_parameters.json'.format(dataset)), 'w') as outfile:
     json.dump(vars(args), outfile)
 
-print('Figure saved to {}'.format(os.path.join(rd,'data/output/{}/figures/2d_potential_function.png'.format(dataset))))
+print('Figure saved to {}'.format(os.path.join(wd,'data/output/{}/figures/2d_potential_function.png'.format(dataset))))

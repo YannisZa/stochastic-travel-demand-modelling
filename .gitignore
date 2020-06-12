@@ -10,6 +10,7 @@ __pycache__/
 
 # Files
 *.so
+*.swp
 
 # Distribution / packaging
 .Python

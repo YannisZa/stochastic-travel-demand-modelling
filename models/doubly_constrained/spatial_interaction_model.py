@@ -13,7 +13,7 @@ from tqdm import tqdm
 from numpy.ctypeslib import ndpointer
 
 
-class DoublyConstrainedModel():
+class SpatialIteraction():
     """ Object including flow (O/D) matrix inference routines.
 
     Parameters
@@ -38,12 +38,10 @@ class DoublyConstrainedModel():
         Loads relevant C functions for inference.
     import_data : function
         Loads relevant data for inference.
-    store_parameters : function
-        Stores relevant parameters for inference.
 
     """
 
-    def __init__(self,dataset:str,**params):
+    def __init__(self,mode:str='stochastic',dataset:str='commuter'):
         '''  Constructor '''
 
         # Define working directory
@@ -54,8 +52,6 @@ class DoublyConstrainedModel():
         self.load_c_functions()
         # Import data
         self.import_data()
-        # Store parameters
-        self.store_parameters(**params)
 
     # Get current working directory and project root directory
     def get_project_root(self):
@@ -115,6 +111,9 @@ class DoublyConstrainedModel():
         # Import cost matrix
         costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
         self.cost_matrix = np.loadtxt(costmatrix_file)
+        # Normalise cost matrix
+        self.cost_matrix = self.normalise_data(self.cost_matrix,False)
+
 
         # Import origin supply
         originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
@@ -124,8 +123,20 @@ class DoublyConstrainedModel():
         destinationdemand_file = os.path.join(self.data_directory,'destination_demand.txt')
         self.destination_demand = np.loadtxt(destinationdemand_file).astype('int32')
 
+        # TO DO: Import initial and final destination sizes
+        # self.initial_destination_sizes =
+        # self.final_destination_sizes =
+
         # Import N,M
-        self.N, self.M = np.shape(self.cost_matrix)
+        self.N, self.M = self.cost_matrix.shape
+
+        # Temporary fix
+        self.initial_destination_sizes = np.ones(self.M)
+        self.final_destination_sizes = np.ones(self.M)
+
+        # Compute total initial and final destination sizes
+        self.total_initial_sizes = np.sum(self.initial_destination_sizes)
+        self.total_final_sizes = np.sum(self.final_destination_sizes)
 
         # Calculate total flow and cost
         self.total_flow = np.sum(self.origin_supply)
@@ -176,6 +187,33 @@ class DoublyConstrainedModel():
 
         return flows_flat,orig_supply_flat,dest_demand_flat,cost_flat
 
+    def normalise_data(self,data,take_logs:bool=False):
+        """ Normalises data for use in inverse problem.
+
+        Parameters
+        ----------
+        data : np.array
+            Any data e.g. destination demand
+        take_logs : bool
+            Flag for taking logs after normalising the vector
+
+        Returns
+        -------
+        np.array
+            Normalised vector.
+
+        """
+
+        # Normalise vector to sum up to 1
+        normalised_vector = data/np.sum(data)
+
+        # If take logs is selected, take logs
+        if take_logs:
+            return np.log(normalised_vector)
+        else:
+            return normalised_vector
+
+
     def store_parameters(self,**params):
         """ Stores parameter values to global variables
 
@@ -195,6 +233,7 @@ class DoublyConstrainedModel():
 
         """
         # Define parameters
+        self.alpha = params['alpha']
         self.beta = params['beta']
         self.A = np.ones(self.N) * params['A_factor']
         self.B = np.ones(self.M) * params['B_factor']
@@ -211,7 +250,8 @@ class DoublyConstrainedModel():
         """
 
         # Load shared object
-        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained/newton_raphson_model.so"))
+        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained/flow_forward_models.so"))
+        lib2 = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/doubly_constrained/potential_function.so"))
 
         # Load DSF procedure flow inference
         self.infer_flows_dsf_procedure = lib.infer_flows_dsf_procedure
@@ -228,7 +268,7 @@ class DoublyConstrainedModel():
                                                     ctypes.c_bool]
 
 
-        # Load DSF procedure flow inference
+        # Load Newton Raphson procedure flow inference
         self.infer_flows_newton_raphson = lib.infer_flows_newton_raphson
         self.infer_flows_newton_raphson.restype = None #ctypes.c_double
         self.infer_flows_newton_raphson.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -243,8 +283,37 @@ class DoublyConstrainedModel():
                                                     ctypes.c_size_t,
                                                     ctypes.c_size_t]
 
+        # Load Iterative proportional filtering procedure flow inference
+        self.infer_flows_ipf_procedure = lib.infer_flows_ipf_procedure
+        self.infer_flows_ipf_procedure.restype = ctypes.c_double
+        self.infer_flows_ipf_procedure.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t,
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_double,
+                                                    ctypes.c_bool]
 
-    def flow_inference_dsf_procedure(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False):
+        # Load Iterative proportional filtering procedure flow inference
+        self.potential_stochastic = lib2.potential_stochastic
+        self.potential_stochastic.restype = ctypes.c_double
+        self.potential_stochastic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t]
+
+
+
+    def flow_inference_dsf_procedure(self,max_iters:int = 10000,show_params:bool = False,show_flows:bool = False,**params):
         """ Computes flows using the DSF procedure for given set of parameters and data.
 
         Parameters
@@ -255,6 +324,8 @@ class DoublyConstrainedModel():
             Flag for printing the inferred parameter values during inference.
         show_flows : bool
             Flag for printing the inferred flows during inference.
+        params : dictionary
+            Parameters used in inference.
 
         Returns
         -------
@@ -265,12 +336,15 @@ class DoublyConstrainedModel():
         # Define empty array of flows
         flows = np.ones((self.N,self.M)).astype('float64')
 
+        # Define beta
+        beta = params['beta']
+
         # Infer flows
-        value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,self.beta,max_iters,show_params,show_flows)
+        value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,beta,max_iters,show_params,show_flows)
 
         return flows
 
-    def flow_inference_newton_raphson(self,newton_raphson_max_iters:int = 100,dsf_max_iters:int = 1000,show_params:bool=False):
+    def flow_inference_newton_raphson(self,newton_raphson_max_iters:int = 100,dsf_max_iters:int = 1000,show_params:bool=False,**params):
         """ Computes flows using the Newton Raphson procedure for given set of parameters and data.
         This function makes regular calls to the DSF procedure.
 
@@ -282,6 +356,8 @@ class DoublyConstrainedModel():
             Maximum number of iterations to run the DSF procedure.
         show_params : bool
             Flag for printing the inferred parameter values during inference.
+        params : dictionary
+            Parameters used in inference.
 
         Returns
         -------
@@ -297,11 +373,11 @@ class DoublyConstrainedModel():
         flows = np.ones((self.N,self.M)).astype('float64')
 
         # Define initial \beta if beta is not zero (default value)
-        if self.beta == 0:
+        if params['beta'] == 0.0:
             # See suggestion in page 386 of "Gravity Models of Spatial Interaction Behavior" book
             beta = np.ones((newton_raphson_max_iters)) * 1.5 * self.total_flow * (1./self.total_cost)
         else:
-            beta = np.ones((newton_raphson_max_iters)) * self.beta
+            beta = np.ones((newton_raphson_max_iters)) * params['beta']
 
         # Define initial cost of beta
         c_beta = np.zeros(newton_raphson_max_iters)
@@ -320,6 +396,55 @@ class DoublyConstrainedModel():
             print('Cost(beta)',c_beta)
 
         return flows,beta,c_beta
+
+
+    def flow_inference_ipf_procedure(self,tolerance:float=1,ipf_max_iters:int = 1000,show_flows:bool=False,**params):
+        """ Infer flows using the Iterative proportional filtering procedure.
+
+        Parameters
+        ----------
+        tolerance : double
+            Tolerance value used to assess if total (origin + destination) errors are within acceptable limits.
+        ipf_max_iters : int
+            Maximum iterations of iterative proportional filtering procedure.
+        show_flows : bool
+            Flag for printing the inferred flows during inference.
+
+        Returns
+        -------
+        np.array
+            Inferred flows
+
+        """
+
+        # Define empty array of flows
+        flows = np.ones((self.N,self.M)).astype('float64')
+
+        # Define parameter vector theta
+        theta = np.array([params['alpha'],params['beta']])
+
+        # Define A and B vectors
+        A_vec = np.ones(self.N)*params['A_factor']
+        B_vec = np.ones(self.M)*params['B_factor']
+
+        # Infer flows
+        inferred_flows = self.infer_flows_ipf_procedure(flows,
+                                                        self.origin_supply,
+                                                        self.destination_demand,
+                                                        self.cost_matrix,
+                                                        self.final_destination_sizes,
+                                                        A_vec,
+                                                        B_vec,
+                                                        self.N,
+                                                        self.M,
+                                                        theta,
+                                                        ipf_max_iters,
+                                                        tolerance,
+                                                        show_flows)
+
+
+        return flows
+
 
     def flow_inference_poisson_regression(self):
         """ Infers flow using PySAL's sparse poisson regression
@@ -350,7 +475,64 @@ class DoublyConstrainedModel():
 
         return pysal_flows,model
 
+    # Wrapper for potential function
+    def potential_value(self,xx,theta):
+        """ Computes potential value in stochastic settings.
 
+        Parameters
+        ----------
+        xx : np.array[Mx1]
+            Log destination W_j's (usually some measure of economic activity)
+        theta : np.array[]
+            List of parameter values.
+
+        Returns
+        -------
+        float
+            Potential function value at xx.
+        np.array[Mx1]
+            Potential function Jacobian at xx.
+
+        """
+        # Initialise Jacobian
+        jacobian = np.zeros(self.M)
+
+        # Normalise destination demand
+        normalised_destination_demand = self.normalise_data(self.destination_demand,False)
+
+        # Normalise cost matrix
+        normalised_cost_matrix = self.normalise_data(self.cost_matrix,False)
+
+        # Compute potential function
+        value = self.potential_stochastic(xx, jacobian, normalised_destination_demand, normalised_cost_matrix, theta, self.N, self.M)
+
+        return (value, jacobian)
+
+    # Wrapper for hessian function
+    def potential_hessian(self,xx,theta):
+
+
+        A = np.zeros((self.M, self.M))
+        value = self.hessian_stochastic(xx, A, self.destination_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+
+        return A
+
+    # Potential function of the likelihood
+    def likelihood_value(self,xx,s2_inv:float=100.):
+        diff = xx - self.initial_log_sizes
+        grad = s2_inv*diff
+        potential = 0.5*s2_inv*np.dot(diff, diff)
+        return pot, grad
+
+    # Potential function for aNealed importance sampling (no flows model)
+    def potential_value_annealed_importance_sampling(self,xx,theta):
+        delta = theta[2]
+        gaM = theta[3]
+        kk = theta[4]
+        gaM_kk_exp_xx = gaM*kk*np.exp(xx)
+        gradV = -gaM*(delta+1./self.M)*np.ones(self.M) + gaM_kk_exp_xx
+        V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
+        return V, gradV
 
     def SRMSE(self,t_hat:np.array):
         """ Computes standardised root mean square error. See equation (22) of

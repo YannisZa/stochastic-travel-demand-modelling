@@ -7,7 +7,7 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 
 
-class UrbanModel():
+class SpatialIteraction():
     """ Wrapper on C code of potential functions.
 
     Parameters

@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 
 def get_root_working_directory():
     """ Returns project's root working directory (entire path).
@@ -35,27 +36,28 @@ def create_directory(dir:str):
         Flag for whether on not directory exists
 
     """
-    # Check if directory already exists
-    if not os.path.isdir(dir):
-        # Create directory
-        print('Created',dir)
-        os.mkdir(dir)
-    else:
-        print('Directory exists',dir)
+    # Create directory if doesn't already exist
+    # Path(dir).mkdir(parents=True, exist_ok=True)
+    try:
+        os.makedirs(dir)
+        print("Created directory",dir)
+    except OSError as e:
+        print("Directory exists",dir)
+
 
 # List of all available datasets and methods
-datasets = ['commuter','retail','travel']
-methods = ['actual','dsf','newton_raphson','poisson_regression']
+datasets = ['commuter','retail','transport']
+methods = ['actual','dsf','newton_raphson','poisson_regression','ipf','inverse_problem']
 
 # Get project's root directory
 wd = get_root_working_directory()
 
 # Create output directory
-create_directory(os.path.join(wd,'output'))
+create_directory(os.path.join(wd,'data','output'))
 
 # Create output directories for each dataset
 for data in datasets:
-    create_directory(os.path.join(wd,'output',data))
+    create_directory(os.path.join(wd,'data','output',data))
     for method in methods:
-        create_directory(os.path.join(wd,'output',data,method))
-        create_directory(os.path.join(wd,'output',data,method,'figures'))
+        create_directory(os.path.join(wd,'data','output',data,method))
+        create_directory(os.path.join(wd,'data','output',data,method,'figures'))

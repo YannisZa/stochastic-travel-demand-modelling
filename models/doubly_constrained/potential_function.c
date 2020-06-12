@@ -15,7 +15,7 @@ double potential_stochastic(const double *xx, double *jacobian, const double *de
     double temp;
     double value = 0.;
 
-    // Initialise gradient/ Jacobian
+    // Initialise gradient / Jacobian
     for(j = 0; j < m; ++j)
         jacobian[j] = 0.;
 
@@ -23,9 +23,9 @@ double potential_stochastic(const double *xx, double *jacobian, const double *de
         // temp = - \epsilon \sum_{j=1}^M (\kappa / \alpha) * \exp(\alpha x_j) - D_j x_j
         // Equation 2
         value += ( kappa*alpha_inv*exp(alpha * xx[j]) - dest_demand[j]*xx[j] );
-        jacobian[j] = - gamma*epsilon * (kappa*exp(alpha * xx[j]) - dest_demand[j]);
+        jacobian[j] = gamma * epsilon * (kappa*exp(alpha * xx[j]) - dest_demand[j]);
     }
-    value *= -gamma*epsilon;
+    value *= gamma*epsilon;
 
     return value;
 }

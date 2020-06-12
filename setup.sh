@@ -8,7 +8,7 @@ trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 echo "Installing python requirements"
 printf "\n"
-pip install -r ./requirements.txt
+pip install -r ./docs/requirements.txt
 
 printf "\n"
 echo "Creating necessary directories"

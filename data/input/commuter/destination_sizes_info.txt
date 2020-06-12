@@ -1,0 +1,4 @@
+destination_sizes_data_filepath,../data/raw/commuter/jobs_and_job_density.csv
+destination_sizes_variable,number_of_jobs
+initial_destination_sizes_year,2001
+final_destination_sizes_year,2005

@@ -18,8 +18,9 @@ printf "\n"
 printf "\n"
 echo "Compiling C code"
 printf "\n"
-gcc -fPIC -shared -o ./models/doubly_constrained/newton_raphson_model.so ./models/doubly_constrained/newton_raphson_model.c -O3
-gcc -fPIC -shared -o ./models/singly_constrained/potential_functions.so ./models/singly_constrained/potential_functions.c -O3
+gcc -fPIC -shared -o ./models/doubly_constrained/flow_forward_models.so ./models/doubly_constrained/flow_forward_models.c -O3
+gcc -fPIC -shared -o ./models/doubly_constrained/potential_function.so ./models/doubly_constrained/potential_function.c -O3
+gcc -fPIC -shared -o ./models/singly_constrained/potential_function.so ./models/singly_constrained/potential_function.c -O3
 
 printf "\n"
 # echo "Run tests"

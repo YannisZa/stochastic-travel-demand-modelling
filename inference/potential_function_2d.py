@@ -84,6 +84,9 @@ wd = get_project_root()
 # Instantiate UrbanModel
 si = SpatialIteraction(mode,dataset)
 
+# Normalise necessary data for learning
+si.normalise_data()
+
 # Setup 2D model
 si.cost_matrix = si.cost_matrix[:,:2]/si.cost_matrix[:,:2].sum()
 si.N, si.M = np.shape(si.cost_matrix)
@@ -116,14 +119,7 @@ for k in tqdm(range(len(alpha_values))):
         for j in range(grid_size):
             temp = np.array([xx[i, j], yy[i, j]])
             # Evaluate potential function for given point in the grid and theta parameters
-            pot = -si.potential_value(temp,theta)[0]
-            if pot is None or (abs(pot) > (2 ** 31 - 1)):
-                print('theta:',theta)
-                print('X1:',temp[0])
-                print('X2:',temp[1])
-                print('Potential:',pot)
-                sys.exit()
-            zz[i, j] = np.exp(-pot)
+            zz[i, j] = np.exp(-si.potential_value(temp,theta)[0])
             # zz[i, j] = np.exp(-si.potential_value(temp,theta)[0])
 
     # Create a contour

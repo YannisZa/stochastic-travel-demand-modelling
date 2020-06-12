@@ -111,9 +111,6 @@ class SpatialIteraction():
         # Import cost matrix
         costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
         self.cost_matrix = np.loadtxt(costmatrix_file)
-        # Normalise cost matrix
-        self.cost_matrix = self.normalise_data(self.cost_matrix,False)
-
 
         # Import origin supply
         originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
@@ -123,16 +120,14 @@ class SpatialIteraction():
         destinationdemand_file = os.path.join(self.data_directory,'destination_demand.txt')
         self.destination_demand = np.loadtxt(destinationdemand_file).astype('int32')
 
-        # TO DO: Import initial and final destination sizes
-        # self.initial_destination_sizes =
-        # self.final_destination_sizes =
+        # Import initial and final destination sizes
+        initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
+        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file)
+        finaldestinationsizes_file = os.path.join(self.data_directory,'final_destination_sizes.txt')
+        self.final_destination_sizes = np.loadtxt(finaldestinationsizes_file)
 
         # Import N,M
         self.N, self.M = self.cost_matrix.shape
-
-        # Temporary fix
-        self.initial_destination_sizes = np.ones(self.M)
-        self.final_destination_sizes = np.ones(self.M)
 
         # Compute total initial and final destination sizes
         self.total_initial_sizes = np.sum(self.initial_destination_sizes)
@@ -187,7 +182,7 @@ class SpatialIteraction():
 
         return flows_flat,orig_supply_flat,dest_demand_flat,cost_flat
 
-    def normalise_data(self,data,take_logs:bool=False):
+    def normalise(self,data,take_logs:bool=False):
         """ Normalises data for use in inverse problem.
 
         Parameters
@@ -213,6 +208,22 @@ class SpatialIteraction():
         else:
             return normalised_vector
 
+    def normalise_data(self):
+
+        # Normalise destination demand
+        self.normalised_destination_demand = self.normalise(self.destination_demand,False)
+
+        # Normalise origin supply
+        self.normalised_origin_supply = self.normalise(self.origin_supply,False)
+
+        # Normalise cost matrix
+        self.normalised_cost_matrix = self.normalise(self.cost_matrix,False)
+
+        # Normalise initial destination sizes
+        self.normalised_initial_destination_sizes = self.normalise(self.initial_destination_sizes,True)
+
+        # Normalise final destination sizes
+        self.normalised_final_destination_sizes = self.normalise(self.final_destination_sizes,True)
 
     def store_parameters(self,**params):
         """ Stores parameter values to global variables
@@ -497,20 +508,13 @@ class SpatialIteraction():
         # Initialise Jacobian
         jacobian = np.zeros(self.M)
 
-        # Normalise destination demand
-        normalised_destination_demand = self.normalise_data(self.destination_demand,False)
-
-        # Normalise cost matrix
-        normalised_cost_matrix = self.normalise_data(self.cost_matrix,False)
-
         # Compute potential function
-        value = self.potential_stochastic(xx, jacobian, normalised_destination_demand, normalised_cost_matrix, theta, self.N, self.M)
+        value = self.potential_stochastic(xx, jacobian, self.normalised_destination_demand, self.normalised_cost_matrix, theta, self.N, self.M)
 
         return (value, jacobian)
 
     # Wrapper for hessian function
     def potential_hessian(self,xx,theta):
-
 
         A = np.zeros((self.M, self.M))
         value = self.hessian_stochastic(xx, A, self.destination_demand, self.cost_matrix, theta, self.N, self.M, wksp)

@@ -110,25 +110,6 @@ w_data = np.exp(xd)
 w_data_centred = w_data - np.mean(w_data)
 ss_tot = np.dot(w_data_centred, w_data_centred)
 
-opt_alphas =  np.log(si.normalised_destination_demand/(args.kappa))/xd
-# Compute residual sum of squares
-# pot_value = 0
-# for j in range(si.M):
-pot_value = np.log(si.normalised_destination_demand/(args.kappa))/np.mean(opt_alphas)
-
-# print('log Pot value',pot_value)
-# print('log W actual',xd)
-# w_pred = np.exp(pot_value)
-# res = w_pred - w_data
-# print('Residuals',res)
-# ss_res = np.dot(res, res)
-# # print('SS res =',ss_res)
-# # Regression sum squares
-# print(1. - ss_res/ss_tot)
-# print('Opt alpha',np.mean(opt_alphas))
-# sys.exit()
-
-
 # Perform grid evaluations
 for i in tqdm(range(grid_n)):
     # Update alpha parameter
@@ -155,10 +136,10 @@ for i in tqdm(range(grid_n)):
 idx = np.unravel_index(r2_values.argmax(), r2_values.shape)
 print("Fitted alpha value:")
 print(alpha_values[idx], r2_values[idx])
-np.savetxt(os.path.join(wd,"data/output/{}/inverse_problem/rsquared_analysis.txt".format(dataset)), r2_values)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/rsquared_analysis_gamma_{str(int(args.gamma))}.txt"), r2_values)
 plt.plot(alpha_values, r2_values)
 plt.xlim([np.min(alpha_values)-0.01, np.max(alpha_values)+0.2])
 plt.ylim([np.min(r2_values)-0.3, np.max(r2_values)+0.5])
 plt.ylabel("R^2")
 plt.xlabel("Parameter alpha")
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/rsquared_analysis.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/rsquared_analysis_gamma_{str(int(args.gamma))}.png'))

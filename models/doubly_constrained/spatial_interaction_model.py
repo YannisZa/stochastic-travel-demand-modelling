@@ -134,7 +134,7 @@ class SpatialIteraction():
         self.total_final_sizes = np.sum(self.final_destination_sizes)
 
         # Calculate total flow and cost
-        self.total_flow = np.sum(self.origin_supply)
+        self.total_flow = np.sum(self.origin_supply[0])
 
         # Import full flow matrix to compute total cost
         self.actual_flows =  np.loadtxt(os.path.join(self.data_directory,'od_matrix.txt'))
@@ -169,8 +169,8 @@ class SpatialIteraction():
                                      "Destination": dest,
                                      "Cost": self.cost_matrix[i,j],
                                      "Flow": self.actual_flows[i,j],
-                                     "OriginSupply": self.origin_supply[i],
-                                     "DestinationDemand":self.destination_demand[j]})
+                                     "OriginSupply": self.origin_supply[0][i],
+                                     "DestinationDemand":self.destination_demand[0][j]})
                 # Append row to dataframe
                 od_data = od_data.append(new_row, ignore_index=True)
 
@@ -211,10 +211,10 @@ class SpatialIteraction():
     def normalise_data(self):
 
         # Normalise destination demand
-        self.normalised_destination_demand = self.normalise(self.destination_demand,False)
+        self.normalised_destination_demand = self.normalise(self.destination_demand[0],False)
 
         # Normalise origin supply
-        self.normalised_origin_supply = self.normalise(self.origin_supply,False)
+        self.normalised_origin_supply = self.normalise(self.origin_supply[0],False)
 
         # Normalise cost matrix
         self.normalised_cost_matrix = self.normalise(self.cost_matrix,False)
@@ -351,7 +351,7 @@ class SpatialIteraction():
         beta = params['beta']
 
         # Infer flows
-        value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,beta,max_iters,show_params,show_flows)
+        value = self.infer_flows_dsf_procedure(flows,self.origin_supply[0],self.destination_demand[0],self.cost_matrix,self.N,self.M,beta,max_iters,show_params,show_flows)
 
         return flows
 
@@ -394,7 +394,7 @@ class SpatialIteraction():
         c_beta = np.zeros(newton_raphson_max_iters)
 
         # Infer flows
-        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply,self.destination_demand,self.cost_matrix,self.total_cost,self.N,self.M,dsf_max_iters,newton_raphson_max_iters)
+        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply[0],self.destination_demand[0],self.cost_matrix,self.total_cost,self.N,self.M,dsf_max_iters,newton_raphson_max_iters)
 
         # Trim beta and c_beta arrays if they were not used in full
         beta = beta[~np.isnan(beta)]
@@ -440,8 +440,8 @@ class SpatialIteraction():
 
         # Infer flows
         inferred_flows = self.infer_flows_ipf_procedure(flows,
-                                                        self.origin_supply,
-                                                        self.destination_demand,
+                                                        self.origin_supply[0],
+                                                        self.destination_demand[0],
                                                         self.cost_matrix,
                                                         self.final_destination_sizes,
                                                         A_vec,
@@ -517,7 +517,7 @@ class SpatialIteraction():
     def potential_hessian(self,xx,theta):
 
         A = np.zeros((self.M, self.M))
-        value = self.hessian_stochastic(xx, A, self.destination_demand, self.cost_matrix, theta, self.N, self.M, wksp)
+        value = self.hessian_stochastic(xx, A, self.destination_demand[0], self.cost_matrix, theta, self.N, self.M, wksp)
 
         return A
 

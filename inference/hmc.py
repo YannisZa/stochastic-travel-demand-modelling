@@ -40,16 +40,14 @@ sys.path.append(get_project_root())
 parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input)")
-parser.add_argument("-m", "--mode",nargs='?',type=str,default = 'stochastic',
-                    help="Mode of evaluation (stochastic/determinstic)")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 2.0,
                     help="Alpha parameter in potential function.")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.3*0.7e6,
-                    help="Blpha parameter in potential function.")
+                    help="Beta parameter in potential function.")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 100.,
-                    help="Gammaa parameter in potential function.")
+                    help="Gamma parameter in potential function.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.3,
                     help="Delta parameter in potential function.")
 parser.add_argument("-k", "--kappa",nargs='?',type=float,default = 1.3,
@@ -70,8 +68,7 @@ print(json.dumps(vars(args), indent = 2))
 
 # Define dataset directory
 dataset = args.dataset_name
-# Define mode (stochastic/determinstic)
-mode = args.mode
+
 # Define type of spatial interaction model
 constrained = args.constrained
 
@@ -87,7 +84,7 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialIteraction
-si = SpatialIteraction(mode,dataset)
+si = SpatialIteraction(dataset)
 
 # Normalise data
 si.normalise_data()

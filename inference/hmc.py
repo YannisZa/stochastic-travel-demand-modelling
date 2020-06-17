@@ -1,5 +1,5 @@
 """
-HMC scheme to sample from prior for latent variables.
+HMC scheme to sample from prior for latent variables of doubly constrained model.
 """
 
 import os
@@ -36,12 +36,13 @@ def get_project_root():
 # Append project root directory to path
 sys.path.append(get_project_root())
 
+# Import Doubly constrained model
+from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+
 # Parse arguments from command line
-parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
+parser = argparse.ArgumentParser(description='HMC scheme to sample from prior for latent variables of doubly constrained model.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input)")
-parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
-                    help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 2.0,
                     help="Alpha parameter in potential function.")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.3*0.7e6,
@@ -52,33 +53,20 @@ parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.3,
                     help="Delta parameter in potential function.")
 parser.add_argument("-k", "--kappa",nargs='?',type=float,default = 1.3,
                     help="Kappa parameter in potential function.")
-parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
-                    help="Epsilon parameter in potential function.")
-parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
-                    help="Flag for showing resulting figure.")
-parser.add_argument("-gmin", "--grid_min",nargs='?',type=int,default = -20.,
-                    help="Smallest log destination W_j (x_j) to evaluate potential value.")
-parser.add_argument("-gmax", "--grid_max",nargs='?',type=int,default = .2,
-                    help="Largest log destination W_j (x_j) to evaluate potential value.")
-parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
-                    help="Number of points (n^2) to evaluate potential function")
+parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 0.1,
+                    help="Leapfrog step size. This is NOT the potential value's epsilon parameter, which assumed to be 1.")
+parser.add_argument("-nm", "--mcmc_n",nargs='?',type=int,default = 10000,
+                    help="Number of MCMC iterations.")
+# parser.add_argument("-nt", "--temp_n",nargs='?',type=int,default = 5,
+#                     help="Number of parallel tempering iterations.")
+parser.add_argument("-L", "--L",nargs='?',type=int,default = 10,
+                    help="Number of leapfrog steps to be taken in HMC latent variable update.")
 args = parser.parse_args()
 # Print arguments
 print(json.dumps(vars(args), indent = 2))
 
 # Define dataset directory
 dataset = args.dataset_name
-
-# Define type of spatial interaction model
-constrained = args.constrained
-
-# Import selected type of spatial interaction model
-if constrained == 'singly':
-    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
-elif constrained == 'doubly':
-    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
-else:
-    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Get project directory
 wd = get_project_root()
@@ -89,37 +77,43 @@ si = SpatialIteraction(dataset)
 # Normalise data
 si.normalise_data()
 
-# Set theta for high-noise model
-theta = [0 for i in range(5)]
+# Set theta for high-noise model's potential value parameters
+theta = [0 for i in range(6)]
 theta[0] = args.alpha
 theta[1] = args.beta
 theta[2] = args.delta/si.M
 theta[3] = args.gamma
 theta[4] = args.kappa
+theta[5] = 1 # this is the potential values epsilon parameter which is assumed to be 1.
 # Convert to np array
 theta = np.array(theta)
 
 # MCMC tuning parameters
 # Number of leapfrog steps
-L = 10
+L = args.L
 # Leapfrog step size
-eps = 0.1
+epsilon = args.epsilon
 
 
 # Set-up MCMC
-mcmc_n = 10000
+mcmc_n = args.mcmc_n
 temp_n = 5
-inverse_temps = np.array([1., 1./2., 1./4., 1./8., 1./16.])
-samples = np.empty((mcmc_n, si.M))   # X-values
+
+# Inverse temperatures that go into potential energy of Hamiltonian dynamics
+inverse_temperatures = np.array([1., 1./2., 1./4., 1./8., 1./16.])
+# Array to store X values sampled at each iteration
+samples = np.empty((mcmc_n, si.M))
 
 
 # Initialize MCMC
 xx = -np.log(si.M)*np.ones((temp_n, si.M))
+
+# Initiliase arrays for potential value and its gradient
 V = np.empty(temp_n)
 gradV = np.empty((temp_n, si.M))
+# Get potential value and its gradient for the initial choice of theta and x
 for j in range(temp_n):
     V[j], gradV[j] = si.potential_value(xx[j],theta)
-
 
 # Counts to keep track of accept rates
 ac = np.zeros(temp_n)
@@ -130,24 +124,54 @@ pcs = 1
 # MCMC algorithm
 for i in tqdm(range(mcmc_n)):
     for j in range(temp_n):
-        #Initialize leapfrog integrator for HMC proposal
-        p = np.random.normal(0., 1., si.M)
+        # Initialise leapfrog integrator for HMC proposal
 
-        H = 0.5*np.dot(p, p) + inverse_temps[j]*V[j]
+        ''' HMC parameter/function correspondence to spatial interaction model
+        q = x - position = log destination sizes
+        U(x) = V(x|theta)*(1/T) -  potential energy = potential value given parameter theta
+        '''
 
-        # X-Proposal
+        # X-Proposal (position q is the log size vector X)
         x_p = xx[j]
-        p_p = p
-        V_p, gradV_p = V[j], gradV[j]
-        for l in range(L):
-            p_p = p_p -0.5*eps*inverse_temps[j]*gradV_p
-            x_p = x_p + eps*p_p
-            V_p, gradV_p = si.potential_value(x_p,theta)
-            p_p = p_p - 0.5*eps*inverse_temps[j]*gradV_p
 
-        # X-accept/reject
+        # Initialise momentum
+        p = np.random.normal(0., 1., si.M)
+        # Set current momentum
+        p_p = p
+        # Get potential value and its Jacobian
+        V_p, gradV_p = V[j], gradV[j]
+        # Make a half step for momentum in the beginning
+        # inverse_temps[j]*gradV_p = grad V(x|theta)*(1/T)
+        p_p -= 0.5*epsilon*inverse_temperatures[j]*gradV_p
+
+        # Hamiltonian total energy function = kinetic energy + potential energy
+        # at the beginning of trajectory
+        # Kinetic energy K(p) = p^TM^{−1}p / 2 with M being the identity matrix
+        H = 0.5*np.dot(p, p) + inverse_temperatures[j]*V[j]
+
+        # Alternate full steps for position and momentum
+        for l in range(L):
+            # Make a full step for the position
+            x_p += epsilon*p_p
+            # Update potential value and its gradient
+            V_p, gradV_p = si.potential_value(x_p,theta)
+            # Make a full step for the momentum except at the end of trajectory
+            if (l != (L-1)):
+                p_p -= 0.5*epsilon*inverse_temperatures[j]*gradV_p
+
+        # Make a falf step for momentum at the end.
+        p_p -= 0.5*epsilon*inverse_temperatures[j]*gradV_p
+
+        # Negate momentum
+        p_p *= (-1)
+
+        # Increment proposal count
         pc[j] += 1
-        H_p = 0.5*np.dot(p_p, p_p) + inverse_temps[j]*V_p
+
+        # Compute Hamiltonian total energy function at the end of trajectory
+        H_p = 0.5*np.dot(p_p, p_p) + inverse_temperatures[j]*V_p
+
+        # Accept/reject X by either returning the position at the end of the trajectory or the initial position
         if np.log(np.random.uniform(0, 1)) < H - H_p:
             xx[j] = x_p
             V[j], gradV[j] = V_p, gradV_p
@@ -157,7 +181,7 @@ for i in tqdm(range(mcmc_n)):
     pcs += 1
     j0 = np.random.randint(0, temp_n-1)
     j1 = j0+1
-    logA = (inverse_temps[j1]-inverse_temps[j0])*(-V[j1] + V[j0])
+    logA = (inverse_temperatures[j1]-inverse_temperatures[j0])*(-V[j1] + V[j0])
     if np.log(np.random.uniform(0, 1)) < logA:
         xx[[j0, j1]] = xx[[j1, j0]]
         V[[j0, j1]] = V[[j1, j0]]

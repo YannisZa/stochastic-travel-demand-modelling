@@ -37,7 +37,7 @@ def get_project_root():
 sys.path.append(get_project_root())
 
 # Parse arguments from command line
-parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
+parser = argparse.ArgumentParser(description='Visualisation of inverse problem results. See result argument below for more info.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
@@ -46,9 +46,13 @@ parser.add_argument("-r", "--result",nargs='?',type=str,choices=['low_noise','hi
                     help="Type of result to visualise. \
                         low_noise: Low-noise statistics generated from MCMC \
                         high_noise: High-noise statistics generated from MCMC \
-                        hmc: Statistics from HMC with parallel tempering \
+                        hmc: Statistics from HMC \
                         opt: Optimal statistics \
                         ")
+parser.add_argument("-lf", "--latent_factor",nargs='?',type=int,default=1000,
+                    help="Factor used to scale latent destination sizes for visualisation.")
+parser.add_argument("-af", "--actual_factor",nargs='?',type=int,default=100,
+                    help="Factor used to scale actual destination demand or origin supply for visualisation.")
 args = parser.parse_args()
 # Print arguments
 print(json.dumps(vars(args), indent = 2))
@@ -58,42 +62,63 @@ dataset = args.dataset_name
 # Define type of spatial interaction model
 constrained = args.constrained
 
-# Import selected type of spatial interaction model
-if constrained == 'singly':
-    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
-elif constrained == 'doubly':
-    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
-else:
-    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Get project directory
 wd = get_project_root()
 
-# Instantiate SpatialIteraction
-si = SpatialIteraction(dataset)
 
-# Normalise data
-si.normalise_data()
+# Import selected type of spatial interaction model
+if constrained == 'singly':
+    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
+
+    # Instantiate SpatialIteraction
+    si = SpatialIteraction(dataset)
+
+    # Normalise data
+    si.normalise_data()
+
+    # Origin supply
+    origin_supply = si.normalised_origin_supply
+
+elif constrained == 'doubly':
+    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+
+    # Instantiate SpatialIteraction
+    si = SpatialIteraction(dataset)
+
+    # Normalise data
+    si.normalise_data()
+
+    # Origin supply
+    origin_supply = si.normalised_origin_supply
+    # Destination demand
+    destination_demand = si.normalised_destination_demand
+
+else:
+    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Read observation data
-# Origin supply
-origin_supply = si.origin_supply[:,0]
-# Destination demand
-destination_demand = si.destination_demand[:,0]
 # Origin and destination locations (lon/lat)
-origin_locs = si.origin_supply[:, [1, 2]]
-destination_locs = si.destination_demand[:, [1, 2]]
-
-# Define initial sizes
+origin_locs = si.origin_locations
+destination_locs = si.destination_locations
+# Actual destination sizes
 xd = si.normalised_initial_destination_sizes
+# Store scale factors for visualisation
+actual_factor = args.actual_factor
+latent_factor= args.latent_factor
+
 
 # Figure number
 j = 0
 
 plt.figure(j)
-plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=100*origin_supply, alpha=0.5)
-plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r', s=1000*np.exp(xd))
+plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r',s=latent_factor*np.exp(xd),label='Actual dest sizes')
+if constrained == 'doubly':
+    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
+else:
+    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
 
+plt.legend()
 
 if args.result == 'low_noise':
     # Low noise stats
@@ -175,19 +200,20 @@ elif args.result == 'high_noise':
 elif args.result == 'hmc':
     print('I am here...')
     # HMC plots
-    for alpha in tqdm([2.0]):
-        samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/hmc_samples_{str(alpha)}.txt"))
+    for alpha in tqdm([2.0]):#0.5,1.0,1.5,2.0]):
+        samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(alpha)}.txt"))
         xx = samples[-1]
-        print(np.exp(xx))
-        print(100*origin_supply)
         j += 1
 
-        sys.exit()
-        # plt.figure(j)
-        # plt.title("HMC alpha =" + str(alpha))
-        # plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=100*origin_supply, alpha=0.5)
-        # plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r', s=np.exp(xx))
-        # print('alpha=',str(alpha),'ended...')
+        plt.figure(j)
+        plt.title("HMC alpha =" + str(alpha))
+        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
+        if constrained == 'doubly':
+            plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
+        else:
+            plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+        plt.legend()
+        print('alpha=',str(alpha),'ended...')
 
 elif args.result == 'optimal':
     # Opt plots

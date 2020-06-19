@@ -58,6 +58,7 @@ create_directory(os.path.join(wd,'data','output'))
 # Create output directories for each dataset
 for data in datasets:
     create_directory(os.path.join(wd,'data','output',data))
+    create_directory(os.path.join(wd,'data','validation',data))
     for method in methods:
         create_directory(os.path.join(wd,'data','output',data,method))
         create_directory(os.path.join(wd,'data','output',data,method,'figures'))

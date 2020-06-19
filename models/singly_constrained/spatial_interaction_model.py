@@ -1,9 +1,13 @@
-""" Wrapper on C code of potential functions """
+""" Inferring flow for singly constrained origin-destination model using various methods. """
 
 import os
 import sys
 import ctypes
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from tqdm import tqdm
 from numpy.ctypeslib import ndpointer
 
 
@@ -30,13 +34,13 @@ class SpatialIteraction():
 
     """
 
-    def __init__(self,mode,dataset):
+    def __init__(self,dataset,stochastic_mode:bool=True):
         '''  Constructor '''
 
-        # Define mode (stochastic/deterministic)
-        self.mode = mode
         # Define dataset
         self.dataset = dataset
+        # Define mode (stochastic or deterministic)
+        self.stochastic_mode = stochastic_mode
         # Define working directory
         self.working_directory = self.get_project_root()
         # Define data directory
@@ -93,12 +97,107 @@ class SpatialIteraction():
         originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
         self.origin_supply = np.loadtxt(originsupply_file)
 
-        # Import initial log sizes
-        initiallogsizes_file = os.path.join(self.data_directory,'initial_log_sizes.txt')
-        self.initial_log_sizes = np.loadtxt(initiallogsizes_file)
+        # Import origin locations
+        originlocations_file = os.path.join(self.data_directory,'origin_locations.txt')
+        self.origin_locations = np.loadtxt(originlocations_file)
+
+        # Import destination locations
+        destinationlocations_file = os.path.join(self.data_directory,'destination_locations.txt')
+        self.destination_locations = np.loadtxt(destinationlocations_file)
+
+        # Import initial and final destination sizes
+        initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
+        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file)
+        finaldestinationsizes_file = os.path.join(self.data_directory,'final_destination_sizes.txt')
+        self.final_destination_sizes = np.loadtxt(finaldestinationsizes_file)
 
         # Import N,M
-        self.N, self.M = np.shape(self.cost_matrix)
+        self.N, self.M = self.cost_matrix.shape
+
+        # Compute total initial and final destination sizes
+        self.total_initial_sizes = np.sum(self.initial_destination_sizes)
+        self.total_final_sizes = np.sum(self.final_destination_sizes)
+
+        # Compute total cost
+        self.total_cost = 0
+        for i in range(self.N):
+            for j in range(self.M):
+                self.total_cost += self.cost_matrix[i,j]*(self.origin_supply[i]/self.N)
+
+    def reshape_data(self):
+        """ Reshapes data into dataframe for PySAL training.
+
+        Returns
+        -------
+        np.array
+            Flows.
+        np.array
+            Origin supply.
+        np.array
+            Destination demand.
+        np.array
+            Cost matrix.
+        """
+        # Initialise empty dataframe
+        od_data = pd.DataFrame(columns=['Origin','Destination','Cost','Flow','OriginSupply','DestinationDemand'])
+        # Loop over origins and destinations to populate dataframe
+        for i,orig in tqdm(enumerate(self.origins),total=len(self.origins)):
+            for j,dest in enumerate(self.destinations):
+                # Add row properties
+                new_row = pd.Series({"Origin": orig,
+                                     "Destination": dest,
+                                     "Cost": self.cost_matrix[i,j],
+                                     "Flow": self.actual_flows[i,j],
+                                     "OriginSupply": self.origin_supply[i]})
+                # Append row to dataframe
+                od_data = od_data.append(new_row, ignore_index=True)
+
+        # Get flatten data and et column types appropriately
+        flows_flat = od_data.Flow.values.astype('int64')
+        orig_supply_flat = od_data.OriginSupply.values.astype('int64')
+        cost_flat = od_data.Cost.values.astype('float64')
+
+        return flows_flat,orig_supply_flat,cost_flat
+
+    def normalise(self,data,take_logs:bool=False):
+        """ Normalises data for use in inverse problem.
+
+        Parameters
+        ----------
+        data : np.array
+            Any data e.g. destination demand
+        take_logs : bool
+            Flag for taking logs after normalising the vector
+
+        Returns
+        -------
+        np.array
+            Normalised vector.
+
+        """
+
+        # Normalise vector to sum up to 1
+        normalised_vector = data/np.sum(data)
+
+        # If take logs is selected, take logs
+        if take_logs:
+            return np.log(normalised_vector)
+        else:
+            return normalised_vector
+
+    def normalise_data(self):
+
+        # Normalise origin supply
+        self.normalised_origin_supply = self.normalise(self.origin_supply,False)
+
+        # Normalise cost matrix
+        self.normalised_cost_matrix = self.normalise(self.cost_matrix,False)
+
+        # Normalise initial destination sizes
+        self.normalised_initial_destination_sizes = self.normalise(self.initial_destination_sizes,True)
+
+        # Normalise final destination sizes
+        self.normalised_final_destination_sizes = self.normalise(self.final_destination_sizes,True)
 
     def load_c_functions(self):
         """ Stores C functions that infer flows to global variables.
@@ -166,9 +265,8 @@ class SpatialIteraction():
                         ctypes.c_size_t,
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
 
-    # Wrapper for potential function
     def potential_value(self,xx,theta):
-        """ Computes potential value in both deterministic and stochastic settings.
+        """ Computes potential value of singly constrained model in both deterministic and stochastic settings.
 
         Parameters
         ----------
@@ -187,17 +285,18 @@ class SpatialIteraction():
         """
         grad = np.zeros(self.M)
         wksp = np.zeros(self.M)
-        if self.mode == 'stochastic':
-          value = self.potential_stochastic(xx, grad, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
+        # print('alpha =',theta[0],'beta =',theta[1],'delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
+        if self.stochastic_mode:
+          value = self.potential_stochastic(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         else:
-          value = self.potential_deterministic(xx, grad, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.potential_deterministic(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return (value, grad)
 
     # Wrapper for hessian function
     def potential_hessian(self,xx,theta):
         A = np.zeros((self.M, self.M))
         wksp = np.zeros(self.M)
-        if self.mode == 'stochastic':
+        if self.stochastic_mode:
           value = self.hessian_stochastic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
         else:
           value = self.hessian_deterministic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)

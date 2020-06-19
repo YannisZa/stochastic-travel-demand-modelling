@@ -1,10 +1,8 @@
 """ Inferring flow for doubly constrained origin-destination model using various methods. """
 
 import os
-import json
 import pysal
 import ctypes
-import argparse
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -114,11 +112,19 @@ class SpatialIteraction():
 
         # Import origin supply
         originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
-        self.origin_supply = np.loadtxt(originsupply_file).astype('int32')
+        self.origin_supply = np.loadtxt(originsupply_file)
 
-        # Import origin supply
+        # Import destination demand
         destinationdemand_file = os.path.join(self.data_directory,'destination_demand.txt')
-        self.destination_demand = np.loadtxt(destinationdemand_file).astype('int32')
+        self.destination_demand = np.loadtxt(destinationdemand_file)
+
+        # Import origin locations
+        originlocations_file = os.path.join(self.data_directory,'origin_locations.txt')
+        self.origin_locations = np.loadtxt(originlocations_file)
+
+        # Import destination locations
+        destinationlocations_file = os.path.join(self.data_directory,'destination_locations.txt')
+        self.destination_locations = np.loadtxt(destinationlocations_file)
 
         # Import initial and final destination sizes
         initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
@@ -133,17 +139,11 @@ class SpatialIteraction():
         self.total_initial_sizes = np.sum(self.initial_destination_sizes)
         self.total_final_sizes = np.sum(self.final_destination_sizes)
 
-        # Calculate total flow and cost
-        self.total_flow = np.sum(self.origin_supply[:,0])
-
-        # Import full flow matrix to compute total cost
-        self.actual_flows =  np.loadtxt(os.path.join(self.data_directory,'od_matrix.txt'))
-
-        # Compute total cost
+        # Compute naive total cost
         self.total_cost = 0
         for i in range(self.N):
             for j in range(self.M):
-                self.total_cost += self.cost_matrix[i,j]*self.actual_flows[i,j]
+                self.total_cost += self.cost_matrix[i,j]*(self.origin_supply[i]/self.N)
 
     def reshape_data(self):
         """ Reshapes data into dataframe for PySAL training.
@@ -168,19 +168,17 @@ class SpatialIteraction():
                 new_row = pd.Series({"Origin": orig,
                                      "Destination": dest,
                                      "Cost": self.cost_matrix[i,j],
-                                     "Flow": self.actual_flows[i,j],
-                                     "OriginSupply": self.origin_supply[:,0][i],
-                                     "DestinationDemand":self.destination_demand[:,0][j]})
+                                     "OriginSupply": self.origin_supply[i],
+                                     "DestinationDemand":self.destination_demand[j]})
                 # Append row to dataframe
                 od_data = od_data.append(new_row, ignore_index=True)
 
         # Get flatten data and et column types appropriately
-        flows_flat = od_data.Flow.values.astype('int64')
         orig_supply_flat = od_data.OriginSupply.values.astype('int64')
         dest_demand_flat = od_data.DestinationDemand.values.astype('int64')
         cost_flat = od_data.Cost.values.astype('float64')
 
-        return flows_flat,orig_supply_flat,dest_demand_flat,cost_flat
+        return orig_supply_flat,dest_demand_flat,cost_flat
 
     def normalise(self,data,take_logs:bool=False):
         """ Normalises data for use in inverse problem.
@@ -211,10 +209,10 @@ class SpatialIteraction():
     def normalise_data(self):
 
         # Normalise destination demand
-        self.normalised_destination_demand = self.normalise(self.destination_demand[:,0],False)
+        self.normalised_destination_demand = self.normalise(self.destination_demand,False)
 
         # Normalise origin supply
-        self.normalised_origin_supply = self.normalise(self.origin_supply[:,0],False)
+        self.normalised_origin_supply = self.normalise(self.origin_supply,False)
 
         # Normalise cost matrix
         self.normalised_cost_matrix = self.normalise(self.cost_matrix,False)
@@ -225,29 +223,6 @@ class SpatialIteraction():
         # Normalise final destination sizes
         self.normalised_final_destination_sizes = self.normalise(self.final_destination_sizes,True)
 
-    def store_parameters(self,**params):
-        """ Stores parameter values to global variables
-
-        Parameters
-        ----------
-        **params : type
-            Description of parameter `**params`.
-
-        Attributes
-        -------
-        beta [float]
-            Distance coefficient.
-        A [float]
-            Initial value for origin effects - used to initialise flows.
-        B [float]
-            Initial value for destination effects - used to initialise flows.
-
-        """
-        # Define parameters
-        self.alpha = params['alpha']
-        self.beta = params['beta']
-        self.A = np.ones(self.N) * params['A_factor']
-        self.B = np.ones(self.M) * params['B_factor']
 
     def load_c_functions(self):
         """ Stores C functions that infer flows to global variables.
@@ -351,7 +326,7 @@ class SpatialIteraction():
         beta = params['beta']
 
         # Infer flows
-        value = self.infer_flows_dsf_procedure(flows,self.origin_supply[:,0],self.destination_demand[:,0],self.cost_matrix,self.N,self.M,beta,max_iters,show_params,show_flows)
+        value = self.infer_flows_dsf_procedure(flows,self.origin_supply,self.destination_demand,self.cost_matrix,self.N,self.M,beta,max_iters,show_params,show_flows)
 
         return flows
 
@@ -386,7 +361,7 @@ class SpatialIteraction():
         # Define initial \beta if beta is not zero (default value)
         if params['beta'] == 0.0:
             # See suggestion in page 386 of "Gravity Models of Spatial Interaction Behavior" book
-            beta = np.ones((newton_raphson_max_iters)) * 1.5 * self.total_flow * (1./self.total_cost)
+            beta = np.ones((newton_raphson_max_iters)) * 1.5 * (1./self.total_cost)
         else:
             beta = np.ones((newton_raphson_max_iters)) * params['beta']
 
@@ -394,7 +369,7 @@ class SpatialIteraction():
         c_beta = np.zeros(newton_raphson_max_iters)
 
         # Infer flows
-        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply[:,0],self.destination_demand[:,0],self.cost_matrix,self.total_cost,self.N,self.M,dsf_max_iters,newton_raphson_max_iters)
+        value = self.infer_flows_newton_raphson(flows,beta,c_beta,self.origin_supply,self.destination_demand,self.cost_matrix,self.total_cost,self.N,self.M,dsf_max_iters,newton_raphson_max_iters)
 
         # Trim beta and c_beta arrays if they were not used in full
         beta = beta[~np.isnan(beta)]
@@ -440,8 +415,8 @@ class SpatialIteraction():
 
         # Infer flows
         inferred_flows = self.infer_flows_ipf_procedure(flows,
-                                                        self.origin_supply[:,0],
-                                                        self.destination_demand[:,0],
+                                                        self.origin_supply,
+                                                        self.destination_demand,
                                                         self.cost_matrix,
                                                         self.final_destination_sizes,
                                                         A_vec,
@@ -488,7 +463,7 @@ class SpatialIteraction():
 
     # Wrapper for potential function
     def potential_value(self,xx,theta):
-        """ Computes potential value in stochastic settings.
+        """ Computes potential value of doubly constrained model in stochastic settings.
 
         Parameters
         ----------
@@ -538,7 +513,7 @@ class SpatialIteraction():
         V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
         return V, gradV
 
-    def SRMSE(self,t_hat:np.array):
+    def SRMSE(self,t_hat:np.array,actual_flows:np.array):
         """ Computes standardised root mean square error. See equation (22) of
         "A primer for working with the Spatial Interaction modeling (SpInt) module
         in the python spatial analysis library (PySAL)" for more details.
@@ -547,6 +522,8 @@ class SpatialIteraction():
         ----------
         t_hat : np.array [NxM]
             Estimated flows.
+        actual_flows : np.array [NxM]
+            Actual flows.
 
         Returns
         -------
@@ -554,4 +531,9 @@ class SpatialIteraction():
             Standardised root mean square error of t_hat.
 
         """
-        return ((np.sum((self.actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (self.total_flow / (self.N*self.M))
+        if actual_flows.shape[0] != t_hat.shape[0]:
+            raise ValueError(f'Actual flows have {actual_flows.shape[0]} rows whereas \hat{T} has {t_hat.shape[0]}.')
+        if actual_flows.shape[1] != t_hat.shape[1]:
+            raise ValueError(f'Actual flows have {actual_flows.shape[1]} columns whereas \hat{T} has {t_hat.shape[1]}.')
+
+        return ((np.sum((actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (np.sum(actual_flows) / (self.N*self.M))

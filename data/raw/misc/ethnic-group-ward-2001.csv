@@ -1,0 +1,629 @@
+﻿ward_code,borough,ward,pop2001
+00ABFX,Barking and Dagenham,Abbey,10206
+00ABFY,Barking and Dagenham,Alibon,9300
+00ABFZ,Barking and Dagenham,Becontree,11450
+00ABGA,Barking and Dagenham,Chadwell Heath,9299
+00ABGB,Barking and Dagenham,Eastbrook,10096
+00ABGC,Barking and Dagenham,Eastbury,10089
+00ABGD,Barking and Dagenham,Gascoigne,9371
+00ABGE,Barking and Dagenham,Goresbrook,10333
+00ABGF,Barking and Dagenham,Heath,9649
+00ABGG,Barking and Dagenham,Longbridge,8890
+00ABGH,Barking and Dagenham,Mayesbrook,9316
+00ABGJ,Barking and Dagenham,Parsloes,9039
+00ABGK,Barking and Dagenham,River,10260
+00ABGL,Barking and Dagenham,Thames,8547
+00ABGM,Barking and Dagenham,Valence,8775
+00ABGN,Barking and Dagenham,Village,9720
+00ABGP,Barking and Dagenham,Whalebone,9604
+00ACFX,Barnet,Brunswick Park,14668
+00ACFY,Barnet,Burnt Oak,15243
+00ACFZ,Barnet,Childs Hill,17261
+00ACGA,Barnet,Colindale,13860
+00ACGB,Barnet,Coppetts,14504
+00ACGC,Barnet,East Barnet,15332
+00ACGD,Barnet,East Finchley,14534
+00ACGE,Barnet,Edgware,14816
+00ACGF,Barnet,Finchley Church End,13810
+00ACGG,Barnet,Garden Suburb,14727
+00ACGH,Barnet,Golders Green,16249
+00ACGJ,Barnet,Hale,15663
+00ACGK,Barnet,Hendon,15377
+00ACGL,Barnet,High Barnet,13847
+00ACGM,Barnet,Mill Hill,15379
+00ACGN,Barnet,Oakleigh,14740
+00ACGP,Barnet,Totteridge,14449
+00ACGQ,Barnet,Underhill,15721
+00ACGR,Barnet,West Finchley,14264
+00ACGS,Barnet,West Hendon,14587
+00ACGT,Barnet,Woodhouse,15533
+00ADGA,Bexley,Barnehurst,10277
+00ADGB,Bexley,Belvedere,10839
+00ADGC,Bexley,Blackfen and Lamorbey,10419
+00ADGD,Bexley,Blendon and Penhill,10418
+00ADGE,Bexley,Brampton,10387
+00ADGF,Bexley,Christchurch,10390
+00ADGG,Bexley,Colyers,10595
+00ADGH,Bexley,Crayford,10289
+00ADGJ,Bexley,Cray Meadows,10295
+00ADGK,Bexley,Danson Park,10315
+00ADGL,Bexley,East Wickham,10383
+00ADGM,Bexley,Erith,9811
+00ADGN,Bexley,Falconwood and Welling,10535
+00ADGP,Bexley,Lesnes Abbey,10947
+00ADGQ,Bexley,Longlands,9611
+00ADGR,Bexley,North End,10465
+00ADGS,Bexley,Northumberland Heath,10483
+00ADGT,Bexley,St Mary`s,10043
+00ADGU,Bexley,St Michael`s,10672
+00ADGW,Bexley,Sidcup,10432
+00ADGX,Bexley,Thamesmead East,10701
+00AEGJ,Brent,Alperton,12323
+00AEGK,Brent,Barnhill,13188
+00AEGL,Brent,Brondesbury Park,11643
+00AEGM,Brent,Dollis Hill,12102
+00AEGN,Brent,Dudden Hill,13350
+00AEGP,Brent,Fryent,11888
+00AEGQ,Brent,Harlesden,12227
+00AEGR,Brent,Kensal Green,10668
+00AEGS,Brent,Kenton,11872
+00AEGT,Brent,Kilburn,14172
+00AEGU,Brent,Mapesbury,13242
+00AEGW,Brent,Northwick Park,12175
+00AEGX,Brent,Preston,12832
+00AEGY,Brent,Queens Park,12400
+00AEGZ,Brent,Queensbury,13175
+00AEHA,Brent,Stonebridge,15943
+00AEHB,Brent,Sudbury,12307
+00AEHC,Brent,Tokyngton,11836
+00AEHD,Brent,Welsh Harp,12405
+00AEHE,Brent,Wembley Central,11002
+00AEHF,Brent,Willesden Green,12714
+00AFGD,Bromley,Bickley,13904
+00AFGE,Bromley,Biggin Hill,10131
+00AFGF,Bromley,Bromley Common and Keston,14171
+00AFGG,Bromley,Bromley Town,14499
+00AFGH,Bromley,Chelsfield and Pratts Bottom,14069
+00AFGJ,Bromley,Chislehurst,14739
+00AFGK,Bromley,Clock House,15757
+00AFGL,Bromley,Copers Cope,14229
+00AFGM,Bromley,Cray Valley East,14663
+00AFGN,Bromley,Cray Valley West,16121
+00AFGP,Bromley,Crystal Palace,11233
+00AFGQ,Bromley,Darwin,4708
+00AFGR,Bromley,Farnborough and Crofton,14180
+00AFGS,Bromley,Hayes and Coney Hall,14923
+00AFGT,Bromley,Kelsey and Eden Park,14751
+00AFGU,Bromley,Mottingham and Chislehurst North,10114
+00AFGW,Bromley,Orpington,15078
+00AFGX,Bromley,Penge and Cator,16687
+00AFGY,Bromley,Petts Wood and Knoll,13627
+00AFGZ,Bromley,Plaistow and Sundridge,14374
+00AFHA,Bromley,Shortlands,9303
+00AFHB,Bromley,West Wickham,14276
+00AGGD,Camden,Belsize,11653
+00AGGE,Camden,Bloomsbury,9224
+00AGGF,Camden,Camden Town with Primrose Hill,11574
+00AGGG,Camden,Cantelowes,10490
+00AGGH,Camden,Fortune Green,10465
+00AGGJ,Camden,Frognal and Fitzjohns,11632
+00AGGK,Camden,Gospel Oak,10465
+00AGGL,Camden,Hampstead Town,10617
+00AGGM,Camden,Haverstock,11224
+00AGGN,Camden,Highgate,10492
+00AGGP,Camden,Holborn and Covent Garden,10645
+00AGGQ,Camden,Kentish Town,11462
+00AGGR,Camden,Kilburn,10494
+00AGGS,Camden,King`s Cross,11413
+00AGGT,Camden,Regent`s Park,11964
+00AGGU,Camden,St Pancras and Somers Town,12490
+00AGGW,Camden,Swiss Cottage,11663
+00AGGX,Camden,West Hampstead,10053
+00AHGE,Croydon,Addiscombe,15402
+00AHGF,Croydon,Ashburton,13560
+00AHGG,Croydon,Bensham Manor,16088
+00AHGH,Croydon,Broad Green,14866
+00AHGJ,Croydon,Coulsdon East,12225
+00AHGK,Croydon,Coulsdon West,13220
+00AHGL,Croydon,Croham,14443
+00AHGM,Croydon,Fairfield,14085
+00AHGN,Croydon,Fieldway,11176
+00AHGP,Croydon,Heathfield,13053
+00AHGQ,Croydon,Kenley,13525
+00AHGR,Croydon,New Addington,10351
+00AHGS,Croydon,Norbury,13812
+00AHGT,Croydon,Purley,12998
+00AHGU,Croydon,Sanderstead,12165
+00AHGW,Croydon,Selhurst,14591
+00AHGX,Croydon,Selsdon and Ballards,11879
+00AHGY,Croydon,Shirley,13978
+00AHGZ,Croydon,South Norwood,14590
+00AHHA,Croydon,Thornton Heath,14784
+00AHHB,Croydon,Upper Norwood,14190
+00AHHC,Croydon,Waddon,13393
+00AHHD,Croydon,West Thornton,16498
+00AHHE,Croydon,Woodside,15715
+00AJGC,Ealing,Acton Central,13442
+00AJGD,Ealing,Cleveland,14179
+00AJGE,Ealing,Dormers Wells,13073
+00AJGF,Ealing,Ealing Broadway,12634
+00AJGG,Ealing,Ealing Common,12804
+00AJGH,Ealing,East Acton,14448
+00AJGJ,Ealing,Elthorne,12328
+00AJGK,Ealing,Greenford Broadway,13297
+00AJGL,Ealing,Greenford Green,12466
+00AJGM,Ealing,Hanger Hill,14010
+00AJGN,Ealing,Hobbayne,13068
+00AJGP,Ealing,Lady Margaret,12806
+00AJGQ,Ealing,Northfield,12477
+00AJGR,Ealing,North Greenford,13089
+00AJGS,Ealing,Northolt Mandeville,12888
+00AJGT,Ealing,Northolt West End,13420
+00AJGU,Ealing,Norwood Green,12647
+00AJGW,Ealing,Perivale,13441
+00AJGX,Ealing,South Acton,13318
+00AJGY,Ealing,Southall Broadway,13049
+00AJGZ,Ealing,Southall Green,12895
+00AJHA,Ealing,Southfield,12481
+00AJHB,Ealing,Walpole,12688
+00AKGL,Enfield,Bowes,11678
+00AKGM,Enfield,Bush Hill Park,13346
+00AKGN,Enfield,Chase,12531
+00AKGP,Enfield,Cockfosters,12536
+00AKGQ,Enfield,Edmonton Green,15103
+00AKGR,Enfield,Enfield Highway,14137
+00AKGS,Enfield,Enfield Lock,12714
+00AKGT,Enfield,Grange,11605
+00AKGU,Enfield,Haselbury,14485
+00AKGW,Enfield,Highlands,12305
+00AKGX,Enfield,Jubilee,13052
+00AKGY,Enfield,Lower Edmonton,12686
+00AKGZ,Enfield,Palmers Green,13197
+00AKHA,Enfield,Ponders End,12978
+00AKHB,Enfield,Southbury,12466
+00AKHC,Enfield,Southgate,12103
+00AKHD,Enfield,Southgate Green,12897
+00AKHE,Enfield,Town,13928
+00AKHF,Enfield,Turkey Street,12744
+00AKHG,Enfield,Upper Edmonton,14843
+00AKHH,Enfield,Winchmore Hill,12225
+00ALGP,Greenwich,Abbey Wood,13372
+00ALGQ,Greenwich,Blackheath Westcombe,11981
+00ALGR,Greenwich,Charlton,12608
+00ALGS,Greenwich,Coldharbour and New Eltham,12425
+00ALGT,Greenwich,Eltham North,12303
+00ALGU,Greenwich,Eltham South,11629
+00ALGW,Greenwich,Eltham West,13438
+00ALGX,Greenwich,Glyndon,13879
+00ALGY,Greenwich,Greenwich West,11228
+00ALGZ,Greenwich,Kidbrooke with Hornfair,12098
+00ALHA,Greenwich,Middle Park and Sutcliffe,12832
+00ALHB,Greenwich,Peninsula,10155
+00ALHC,Greenwich,Plumstead,14112
+00ALHD,Greenwich,Shooters Hill,12854
+00ALHE,Greenwich,Thamesmead Moorings,11755
+00ALHF,Greenwich,Woolwich Common,14967
+00ALHG,Greenwich,Woolwich Riverside,12767
+00AMGA,Hackney,Brownswood,11331
+00AMGB,Hackney,Cazenove,10500
+00AMGC,Hackney,Chatham,10728
+00AMGD,Hackney,Clissold,10438
+00AMGE,Hackney,Dalston,10358
+00AMGF,Hackney,De Beauvoir,9928
+00AMGG,Hackney,Hackney Central,10291
+00AMGH,Hackney,Hackney Downs,10276
+00AMGJ,Hackney,Haggerston,10366
+00AMGK,Hackney,Hoxton,10698
+00AMGL,Hackney,King`s Park,10964
+00AMGM,Hackney,Leabridge,9857
+00AMGN,Hackney,Lordship,11299
+00AMGP,Hackney,New River,11504
+00AMGQ,Hackney,Queensbridge,10179
+00AMGR,Hackney,Springfield,10859
+00AMGS,Hackney,Stoke Newington Central,10133
+00AMGT,Hackney,Victoria,12066
+00AMGU,Hackney,Wick,11049
+00ANGA,Hammersmith and Fulham,Addison,11185
+00ANGB,Hammersmith and Fulham,Askew,11886
+00ANGC,Hammersmith and Fulham,Avonmore and Brook Green,11522
+00ANGD,Hammersmith and Fulham,College Park and Old Oak,7643
+00ANGE,Hammersmith and Fulham,Fulham Broadway,10189
+00ANGF,Hammersmith and Fulham,Fulham Reach,10197
+00ANGG,Hammersmith and Fulham,Hammersmith Broadway,11560
+00ANGH,Hammersmith and Fulham,Munster,9884
+00ANGJ,Hammersmith and Fulham,North End,10904
+00ANGK,Hammersmith and Fulham,Palace Riverside,7333
+00ANGL,Hammersmith and Fulham,Parsons Green and Walham,10280
+00ANGM,Hammersmith and Fulham,Ravenscourt Park,10791
+00ANGN,Hammersmith and Fulham,Sands End,9723
+00ANGP,Hammersmith and Fulham,Shepherd`s Bush Green,10249
+00ANGQ,Hammersmith and Fulham,Town,9899
+00ANGR,Hammersmith and Fulham,Wormholt and White City,11997
+00APGA,Haringey,Alexandra,10475
+00APGB,Haringey,Bounds Green,10905
+00APGC,Haringey,Bruce Grove,11997
+00APGD,Haringey,Crouch End,10762
+00APGE,Haringey,Fortis Green,11235
+00APGF,Haringey,Harringay,10525
+00APGG,Haringey,Highgate,10310
+00APGH,Haringey,Hornsey,10075
+00APGJ,Haringey,Muswell Hill,9975
+00APGK,Haringey,Noel Park,11472
+00APGL,Haringey,Northumberland Park,12606
+00APGM,Haringey,St Ann`s,12603
+00APGN,Haringey,Seven Sisters,13179
+00APGP,Haringey,Stroud Green,10324
+00APGQ,Haringey,Tottenham Green,11966
+00APGR,Haringey,Tottenham Hale,12728
+00APGS,Haringey,West Green,11884
+00APGT,Haringey,White Hart Lane,11985
+00APGU,Haringey,Woodside,11501
+00AQFY,Harrow,Belmont,9506
+00AQFZ,Harrow,Canons,10091
+00AQGA,Harrow,Edgware,9832
+00AQGB,Harrow,Greenhill,9324
+00AQGC,Harrow,Harrow on the Hill,10632
+00AQGD,Harrow,Harrow Weald,10345
+00AQGE,Harrow,Hatch End,10098
+00AQGF,Harrow,Headstone North,9522
+00AQGG,Harrow,Headstone South,9366
+00AQGH,Harrow,Kenton East,9888
+00AQGJ,Harrow,Kenton West,10277
+00AQGK,Harrow,Marlborough,9207
+00AQGL,Harrow,Pinner,9601
+00AQGM,Harrow,Pinner South,9555
+00AQGN,Harrow,Queensbury,10055
+00AQGP,Harrow,Rayners Lane,10038
+00AQGQ,Harrow,Roxbourne,10947
+00AQGR,Harrow,Roxeth,10538
+00AQGS,Harrow,Stanmore Park,9339
+00AQGT,Harrow,Wealdstone,8963
+00AQGU,Harrow,West Harrow,9690
+00ARGC,Havering,Brooklands,13024
+00ARGD,Havering,Cranham,12242
+00ARGE,Havering,Elm Park,12048
+00ARGF,Havering,Emerson Park,11396
+00ARGG,Havering,Gooshays,13991
+00ARGH,Havering,Hacton,12494
+00ARGJ,Havering,Harold Wood,12004
+00ARGK,Havering,Havering Park,12366
+00ARGL,Havering,Heaton,11778
+00ARGM,Havering,Hylands,12380
+00ARGN,Havering,Mawneys,12556
+00ARGP,Havering,Pettits,12832
+00ARGQ,Havering,Rainham and Wennington,12114
+00ARGR,Havering,Romford Town,13200
+00ARGS,Havering,St Andrew`s,12778
+00ARGT,Havering,South Hornchurch,12592
+00ARGU,Havering,Squirrel`s Heath,11780
+00ARGW,Havering,Upminster,12674
+00ASGG,Hillingdon,Barnhill,11728
+00ASGH,Hillingdon,Botwell,12432
+00ASGJ,Hillingdon,Brunel,10631
+00ASGK,Hillingdon,Cavendish,11239
+00ASGL,Hillingdon,Charville,11429
+00ASGM,Hillingdon,Eastcote and East Ruislip,11480
+00ASGN,Hillingdon,Harefield,7091
+00ASGP,Hillingdon,Heathrow Villages,10217
+00ASGQ,Hillingdon,Hillingdon East,11878
+00ASGR,Hillingdon,Ickenham,9933
+00ASGS,Hillingdon,Manor,10902
+00ASGT,Hillingdon,Northwood,10559
+00ASGU,Hillingdon,Northwood Hills,10833
+00ASGW,Hillingdon,Pinkwell,12346
+00ASGX,Hillingdon,South Ruislip,10823
+00ASGY,Hillingdon,Townfield,11626
+00ASGZ,Hillingdon,Uxbridge North,11671
+00ASHA,Hillingdon,Uxbridge South,11438
+00ASHB,Hillingdon,West Drayton,11589
+00ASHC,Hillingdon,West Ruislip,10183
+00ASHD,Hillingdon,Yeading,11923
+00ASHE,Hillingdon,Yiewsley,11056
+00ATFY,Hounslow,Bedfont,10104
+00ATFZ,Hounslow,Brentford,10745
+00ATGA,Hounslow,Chiswick Homefields,10290
+00ATGB,Hounslow,Chiswick Riverside,10935
+00ATGC,Hounslow,Cranford,10936
+00ATGD,Hounslow,Feltham North,9570
+00ATGE,Hounslow,Feltham West,11530
+00ATGF,Hounslow,Hanworth,10995
+00ATGG,Hounslow,Hanworth Park,10396
+00ATGH,Hounslow,Heston Central,10998
+00ATGJ,Hounslow,Heston East,10781
+00ATGK,Hounslow,Heston West,11332
+00ATGL,Hounslow,Hounslow Central,10791
+00ATGM,Hounslow,Hounslow Heath,11115
+00ATGN,Hounslow,Hounslow South,10369
+00ATGP,Hounslow,Hounslow West,10356
+00ATGQ,Hounslow,Isleworth,10745
+00ATGR,Hounslow,Osterley and Spring Grove,10452
+00ATGS,Hounslow,Syon,9717
+00ATGT,Hounslow,Turnham Green,10184
+00AUFX,Islington,Barnsbury,10274
+00AUFY,Islington,Bunhill,10055
+00AUFZ,Islington,Caledonian,11566
+00AUGA,Islington,Canonbury,9899
+00AUGB,Islington,Clerkenwell,9773
+00AUGC,Islington,Finsbury Park,12448
+00AUGD,Islington,Highbury East,10278
+00AUGE,Islington,Highbury West,11681
+00AUGF,Islington,Hillrise,11382
+00AUGG,Islington,Holloway,11214
+00AUGH,Islington,Junction,10816
+00AUGJ,Islington,Mildmay,11339
+00AUGK,Islington,St George`s,11178
+00AUGL,Islington,St Mary`s,10499
+00AUGM,Islington,St Peter`s,10933
+00AUGN,Islington,Tollington,12462
+00AWFY,Kensington and Chelsea,Abingdon,9053
+00AWFZ,Kensington and Chelsea,Brompton,9313
+00AWGA,Kensington and Chelsea,Campden,8173
+00AWGB,Kensington and Chelsea,Colville,7909
+00AWGC,Kensington and Chelsea,Courtfield,9578
+00AWGD,Kensington and Chelsea,Cremorne,9290
+00AWGE,Kensington and Chelsea,Earl`s Court,9659
+00AWGF,Kensington and Chelsea,Golborne,8849
+00AWGG,Kensington and Chelsea,Hans Town,9335
+00AWGH,Kensington and Chelsea,Holland,9372
+00AWGJ,Kensington and Chelsea,Norland,8778
+00AWGK,Kensington and Chelsea,Notting Barns,9000
+00AWGL,Kensington and Chelsea,Pembridge,8116
+00AWGM,Kensington and Chelsea,Queen`s Gate,9668
+00AWGN,Kensington and Chelsea,Redcliffe,8625
+00AWGP,Kensington and Chelsea,Royal Hospital,7662
+00AWGQ,Kensington and Chelsea,St Charles,9010
+00AWGR,Kensington and Chelsea,Stanley,7529
+00AXFX,Kingston upon Thames,Alexandra,9045
+00AXFY,Kingston upon Thames,Berrylands,9278
+00AXFZ,Kingston upon Thames,Beverley,9488
+00AXGA,Kingston upon Thames,Canbury,9604
+00AXGB,Kingston upon Thames,Chessington North and Hook,8720
+00AXGC,Kingston upon Thames,Chessington South,9488
+00AXGD,Kingston upon Thames,Coombe Hill,10318
+00AXGE,Kingston upon Thames,Coombe Vale,9271
+00AXGF,Kingston upon Thames,Grove,7864
+00AXGG,Kingston upon Thames,Norbiton,8844
+00AXGH,Kingston upon Thames,Old Malden,9012
+00AXGJ,Kingston upon Thames,St James,8571
+00AXGK,Kingston upon Thames,St Mark`s,9644
+00AXGL,Kingston upon Thames,Surbiton Hill,10191
+00AXGM,Kingston upon Thames,Tolworth and Hook Rise,9531
+00AXGN,Kingston upon Thames,Tudor,8403
+00AYFZ,Lambeth,Bishop`s,9194
+00AYGA,Lambeth,Brixton Hill,12458
+00AYGB,Lambeth,Clapham Common,12270
+00AYGC,Lambeth,Clapham Town,13332
+00AYGD,Lambeth,Coldharbour,14376
+00AYGE,Lambeth,Ferndale,12898
+00AYGF,Lambeth,Gipsy Hill,13601
+00AYGG,Lambeth,Herne Hill,11805
+00AYGH,Lambeth,Knight`s Hill,13687
+00AYGJ,Lambeth,Larkhall,13906
+00AYGK,Lambeth,Oval,11983
+00AYGL,Lambeth,Prince`s,11636
+00AYGM,Lambeth,St Leonard`s,12215
+00AYGN,Lambeth,Stockwell,13416
+00AYGP,Lambeth,Streatham Hill,13359
+00AYGQ,Lambeth,Streatham South,13449
+00AYGR,Lambeth,Streatham Wells,12746
+00AYGS,Lambeth,Thornton,12589
+00AYGT,Lambeth,Thurlow Park,10958
+00AYGU,Lambeth,Tulse Hill,13119
+00AYGW,Lambeth,Vassall,13172
+00AZGD,Lewisham,Bellingham,13642
+00AZGE,Lewisham,Blackheath,13135
+00AZGF,Lewisham,Brockley,13697
+00AZGG,Lewisham,Catford South,14031
+00AZGH,Lewisham,Crofton Park,13904
+00AZGJ,Lewisham,Downham,14311
+00AZGK,Lewisham,Evelyn,14512
+00AZGL,Lewisham,Forest Hill,14039
+00AZGM,Lewisham,Grove Park,14010
+00AZGN,Lewisham,Ladywell,12430
+00AZGP,Lewisham,Lee Green,12057
+00AZGQ,Lewisham,Lewisham Central,13190
+00AZGR,Lewisham,New Cross,15093
+00AZGS,Lewisham,Perry Vale,14513
+00AZGT,Lewisham,Rushey Green,13215
+00AZGU,Lewisham,Sydenham,15353
+00AZGW,Lewisham,Telegraph Hill,14426
+00AZGX,Lewisham,Whitefoot,13364
+00BAFX,Merton,Abbey,9526
+00BAFY,Merton,Cannon Hill,9286
+00BAFZ,Merton,Colliers Wood,9293
+00BAGA,Merton,Cricket Green,10369
+00BAGB,Merton,Dundonald,9018
+00BAGC,Merton,Figge`s Marsh,9896
+00BAGD,Merton,Graveney,9384
+00BAGE,Merton,Hillside,9074
+00BAGF,Merton,Lavender Fields,9607
+00BAGG,Merton,Longthornton,9629
+00BAGH,Merton,Lower Morden,8561
+00BAGJ,Merton,Merton Park,9144
+00BAGK,Merton,Pollards Hill,9914
+00BAGL,Merton,Ravensbury,9270
+00BAGM,Merton,Raynes Park,9395
+00BAGN,Merton,St Helier,9155
+00BAGP,Merton,Trinity,8835
+00BAGQ,Merton,Village,8914
+00BAGR,Merton,West Barnes,9559
+00BAGS,Merton,Wimbledon Park,10079
+00BBGB,Newham,Beckton,13112
+00BBGC,Newham,Boleyn,12289
+00BBGD,Newham,Canning Town North,12061
+00BBGE,Newham,Canning Town South,11278
+00BBGF,Newham,Custom House,11875
+00BBGG,Newham,East Ham Central,12162
+00BBGH,Newham,East Ham North,11381
+00BBGJ,Newham,East Ham South,12465
+00BBGK,Newham,Forest Gate North,12634
+00BBGL,Newham,Forest Gate South,13929
+00BBGM,Newham,Green Street East,13212
+00BBGN,Newham,Green Street West,12860
+00BBGP,Newham,Little Ilford,13329
+00BBGQ,Newham,Manor Park,12103
+00BBGR,Newham,Plaistow North,13236
+00BBGS,Newham,Plaistow South,11832
+00BBGT,Newham,Royal Docks,6186
+00BBGU,Newham,Stratford and New Town,12378
+00BBGW,Newham,Wall End,12932
+00BBGX,Newham,West Ham,12637
+00BCFY,Redbridge,Aldborough,11611
+00BCFZ,Redbridge,Barkingside,11303
+00BCGA,Redbridge,Bridge,11211
+00BCGB,Redbridge,Chadwell,11030
+00BCGC,Redbridge,Church End,9997
+00BCGD,Redbridge,Clayhall,11855
+00BCGE,Redbridge,Clementswood,11286
+00BCGF,Redbridge,Cranbrook,11858
+00BCGG,Redbridge,Fairlop,10420
+00BCGH,Redbridge,Fullwell,11269
+00BCGJ,Redbridge,Goodmayes,10994
+00BCGK,Redbridge,Hainault,11367
+00BCGL,Redbridge,Loxford,13585
+00BCGM,Redbridge,Mayfield,11226
+00BCGN,Redbridge,Monkhams,9866
+00BCGP,Redbridge,Newbury,13074
+00BCGQ,Redbridge,Roding,10770
+00BCGR,Redbridge,Seven Kings,11910
+00BCGS,Redbridge,Snaresbrook,10854
+00BCGT,Redbridge,Valentines,11643
+00BCGU,Redbridge,Wanstead,11506
+00BDFW,Richmond upon Thames,Barnes,9823
+00BDFX,Richmond upon Thames,East Sheen,9744
+00BDFY,Richmond upon Thames,Fulwell and Hampton Hill,9448
+00BDFZ,Richmond upon Thames,Ham Petersham and Richmond Riverside,9678
+00BDGA,Richmond upon Thames,Hampton,9431
+00BDGB,Richmond upon Thames,Hampton North,9077
+00BDGC,Richmond upon Thames,Hampton Wick,9081
+00BDGD,Richmond upon Thames,Heathfield,9541
+00BDGE,Richmond upon Thames,Kew,9445
+00BDGF,Richmond upon Thames,Mortlake and Barnes Common,9925
+00BDGG,Richmond upon Thames,North Richmond,9767
+00BDGH,Richmond upon Thames,St Margarets and North Twickenham,9946
+00BDGJ,Richmond upon Thames,South Richmond,10278
+00BDGK,Richmond upon Thames,South Twickenham,9028
+00BDGL,Richmond upon Thames,Teddington,9615
+00BDGM,Richmond upon Thames,Twickenham Riverside,9590
+00BDGN,Richmond upon Thames,West Twickenham,9772
+00BDGP,Richmond upon Thames,Whitton,9149
+00BEGC,Southwark,Brunswick Park,11136
+00BEGD,Southwark,Camberwell Green,12798
+00BEGE,Southwark,Cathedrals,13115
+00BEGF,Southwark,Chaucer,13058
+00BEGG,Southwark,College,10294
+00BEGH,Southwark,East Dulwich,10840
+00BEGJ,Southwark,East Walworth,12000
+00BEGK,Southwark,Faraday,12697
+00BEGL,Southwark,Grange,11985
+00BEGM,Southwark,Livesey,12070
+00BEGN,Southwark,Newington,12870
+00BEGP,Southwark,Nunhead,10271
+00BEGQ,Southwark,Peckham,11381
+00BEGR,Southwark,Peckham Rye,11248
+00BEGS,Southwark,Riverside,10979
+00BEGT,Southwark,Rotherhithe,11395
+00BEGU,Southwark,South Bermondsey,11631
+00BEGW,Southwark,South Camberwell,11295
+00BEGX,Southwark,Surrey Docks,11346
+00BEGY,Southwark,The Lane,11973
+00BEGZ,Southwark,Village,10484
+00BFGC,Sutton,Beddington North,9941
+00BFGD,Sutton,Beddington South,10423
+00BFGE,Sutton,Belmont,9790
+00BFGF,Sutton,Carshalton Central,9833
+00BFGG,Sutton,Carshalton South and Clockhouse,9747
+00BFGH,Sutton,Cheam,9695
+00BFGJ,Sutton,Nonsuch,10160
+00BFGK,Sutton,St Helier,10798
+00BFGL,Sutton,Stonecot,10327
+00BFGM,Sutton,Sutton Central,10016
+00BFGN,Sutton,Sutton North,9675
+00BFGP,Sutton,Sutton South,8827
+00BFGQ,Sutton,Sutton West,9980
+00BFGR,Sutton,The Wrythe,10384
+00BFGS,Sutton,Wallington North,9974
+00BFGT,Sutton,Wallington South,9602
+00BFGU,Sutton,Wandle Valley,10722
+00BFGW,Sutton,Worcester Park,9874
+00BGFW,Tower Hamlets,Bethnal Green North,11765
+00BGFX,Tower Hamlets,Bethnal Green South,13675
+00BGFY,Tower Hamlets,Blackwall and Cubitt Town,11939
+00BGFZ,Tower Hamlets,Bow East,8797
+00BGGA,Tower Hamlets,Bow West,10421
+00BGGB,Tower Hamlets,Bromley-by-Bow,11581
+00BGGC,Tower Hamlets,East India and Lansbury,11496
+00BGGD,Tower Hamlets,Limehouse,12484
+00BGGE,Tower Hamlets,Mile End and Globe Town,11801
+00BGGF,Tower Hamlets,Mile End East,11139
+00BGGG,Tower Hamlets,Millwall,12892
+00BGGH,Tower Hamlets,St Dunstan`s and Stepney Green,12679
+00BGGJ,Tower Hamlets,St Katherine`s and Wapping,11245
+00BGGK,Tower Hamlets,Shadwell,12078
+00BGGL,Tower Hamlets,Spitalfields and Banglatown,8383
+00BGGM,Tower Hamlets,Weavers,11685
+00BGGN,Tower Hamlets,Whitechapel,12046
+00BHFX,Waltham Forest,Cann Hall,11388
+00BHFY,Waltham Forest,Cathall,10608
+00BHFZ,Waltham Forest,Chapel End,11098
+00BHGA,Waltham Forest,Chingford Green,9497
+00BHGB,Waltham Forest,Endlebury,10146
+00BHGC,Waltham Forest,Forest,10427
+00BHGD,Waltham Forest,Grove Green,11400
+00BHGE,Waltham Forest,Hale End and Highams Park,10075
+00BHGF,Waltham Forest,Hatch Lane,9879
+00BHGG,Waltham Forest,High Street,11152
+00BHGH,Waltham Forest,Higham Hill,11161
+00BHGJ,Waltham Forest,Hoe Street,11579
+00BHGK,Waltham Forest,Larkswood,10582
+00BHGL,Waltham Forest,Lea Bridge,12340
+00BHGM,Waltham Forest,Leyton,12522
+00BHGN,Waltham Forest,Leytonstone,10635
+00BHGP,Waltham Forest,Markhouse,10866
+00BHGQ,Waltham Forest,Valley,10680
+00BHGR,Waltham Forest,William Morris,10975
+00BHGS,Waltham Forest,Wood Street,11331
+00BJFZ,Wandsworth,Balham,12840
+00BJGA,Wandsworth,Bedford,13017
+00BJGB,Wandsworth,Earlsfield,12903
+00BJGC,Wandsworth,East Putney,13196
+00BJGD,Wandsworth,Fairfield,12034
+00BJGE,Wandsworth,Furzedown,13539
+00BJGF,Wandsworth,Graveney,13213
+00BJGG,Wandsworth,Latchmere,12596
+00BJGH,Wandsworth,Nightingale,13549
+00BJGJ,Wandsworth,Northcote,12851
+00BJGK,Wandsworth,Queenstown,12505
+00BJGL,Wandsworth,Roehampton,13011
+00BJGM,Wandsworth,St Mary`s Park,12395
+00BJGN,Wandsworth,Shaftesbury,12464
+00BJGP,Wandsworth,Southfields,14063
+00BJGQ,Wandsworth,Thamesfield,12344
+00BJGR,Wandsworth,Tooting,13261
+00BJGS,Wandsworth,Wandsworth Common,13555
+00BJGT,Wandsworth,West Hill,14356
+00BJGU,Wandsworth,West Putney,12688
+00BKGA,Westminster,Abbey Road,9554
+00BKGB,Westminster,Bayswater,8145
+00BKGC,Westminster,Bryanston and Dorset Square,10669
+00BKGD,Westminster,Churchill,8391
+00BKGE,Westminster,Church Street,6490
+00BKGF,Westminster,Harrow Road,8621
+00BKGG,Westminster,Hyde Park,10330
+00BKGH,Westminster,Knightsbridge and Belgravia,8949
+00BKGJ,Westminster,Lancaster Gate,12003
+00BKGK,Westminster,Little Venice,8100
+00BKGL,Westminster,Maida Vale,9647
+00BKGM,Westminster,Marylebone High Street,8860
+00BKGN,Westminster,Queen`s Park,9179
+00BKGP,Westminster,Regent`s Park,11049
+00BKGQ,Westminster,St James`s,8658
+00BKGR,Westminster,Tachbrook,8342
+00BKGS,Westminster,Vincent Square,8630
+00BKGT,Westminster,Warwick,8131
+00BKGU,Westminster,Westbourne,10075
+00BKGW,Westminster,West End,7463
+00AA1,City of London,Aldersgate,1794
+00AA2,City of London,Aldgate,1794
+00AA3,City of London,Bassishaw,1794
+00AA4,City of London,Bread Street,1794

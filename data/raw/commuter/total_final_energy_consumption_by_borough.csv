@@ -1,0 +1,364 @@
+﻿Code,Area,Year,Fuel,Sector,Measurement,Value
+E09000002,Barking and Dagenham,2005,Consuming Sector,Transport,Ktoe ,54.46876696
+E09000003,Barnet,2005,Consuming Sector,Transport,Ktoe ,124.7040633
+E09000004,Bexley,2005,Consuming Sector,Transport,Ktoe ,76.90982728
+E09000005,Brent,2005,Consuming Sector,Transport,Ktoe ,77.16169745
+E09000006,Bromley,2005,Consuming Sector,Transport,Ktoe ,105.4541483
+E09000007,Camden,2005,Consuming Sector,Transport,Ktoe ,50.37005564
+E09000001,City of London,2005,Consuming Sector,Transport,Ktoe ,18.86499939
+E09000008,Croydon,2005,Consuming Sector,Transport,Ktoe ,103.5678368
+E09000009,Ealing,2005,Consuming Sector,Transport,Ktoe ,108.3866972
+E09000010,Enfield,2005,Consuming Sector,Transport,Ktoe ,124.6960796
+E09000011,Greenwich,2005,Consuming Sector,Transport,Ktoe ,95.64068679
+E09000012,Hackney,2005,Consuming Sector,Transport,Ktoe ,53.6459524
+E09000013,Hammersmith and Fulham,2005,Consuming Sector,Transport,Ktoe ,57.25268389
+E09000014,Haringey,2005,Consuming Sector,Transport,Ktoe ,59.97391901
+E09000015,Harrow,2005,Consuming Sector,Transport,Ktoe ,50.31943431
+E09000016,Havering,2005,Consuming Sector,Transport,Ktoe ,123.0044605
+E09000017,Hillingdon,2005,Consuming Sector,Transport,Ktoe ,169.5689428
+E09000018,Hounslow,2005,Consuming Sector,Transport,Ktoe ,124.1043471
+E09000019,Islington,2005,Consuming Sector,Transport,Ktoe ,43.69389475
+E09000020,Kensington and Chelsea,2005,Consuming Sector,Transport,Ktoe ,50.62494102
+E09000021,Kingston upon Thames,2005,Consuming Sector,Transport,Ktoe ,73.70131293
+E09000022,Lambeth,2005,Consuming Sector,Transport,Ktoe ,83.76865246
+E09000023,Lewisham,2005,Consuming Sector,Transport,Ktoe ,81.33212019
+E09000024,Merton,2005,Consuming Sector,Transport,Ktoe ,52.87939605
+E09000025,Newham,2005,Consuming Sector,Transport,Ktoe ,91.6875108
+E09000026,Redbridge,2005,Consuming Sector,Transport,Ktoe ,84.2025214
+E09000027,Richmond upon Thames,2005,Consuming Sector,Transport,Ktoe ,68.20062738
+E09000028,Southwark,2005,Consuming Sector,Transport,Ktoe ,81.87142457
+E09000029,Sutton,2005,Consuming Sector,Transport,Ktoe ,54.41116551
+E09000030,Tower Hamlets,2005,Consuming Sector,Transport,Ktoe ,90.75423199
+E09000031,Waltham Forest,2005,Consuming Sector,Transport,Ktoe ,59.6362568
+E09000032,Wandsworth,2005,Consuming Sector,Transport,Ktoe ,88.51456515
+E09000033,Westminster,2005,Consuming Sector,Transport,Ktoe ,100.7261641
+E09000002,Barking and Dagenham,2006,Consuming Sector,Transport,Ktoe ,57.34523002
+E09000003,Barnet,2006,Consuming Sector,Transport,Ktoe ,127.8655701
+E09000004,Bexley,2006,Consuming Sector,Transport,Ktoe ,76.55545452
+E09000005,Brent,2006,Consuming Sector,Transport,Ktoe ,77.24494182
+E09000006,Bromley,2006,Consuming Sector,Transport,Ktoe ,106.0906019
+E09000007,Camden,2006,Consuming Sector,Transport,Ktoe ,51.48121751
+E09000001,City of London,2006,Consuming Sector,Transport,Ktoe ,19.30937001
+E09000008,Croydon,2006,Consuming Sector,Transport,Ktoe ,103.999699
+E09000009,Ealing,2006,Consuming Sector,Transport,Ktoe ,109.2270507
+E09000010,Enfield,2006,Consuming Sector,Transport,Ktoe ,128.1656267
+E09000011,Greenwich,2006,Consuming Sector,Transport,Ktoe ,95.01753446
+E09000012,Hackney,2006,Consuming Sector,Transport,Ktoe ,55.92146722
+E09000013,Hammersmith and Fulham,2006,Consuming Sector,Transport,Ktoe ,59.53301147
+E09000014,Haringey,2006,Consuming Sector,Transport,Ktoe ,60.93610567
+E09000015,Harrow,2006,Consuming Sector,Transport,Ktoe ,50.22362122
+E09000016,Havering,2006,Consuming Sector,Transport,Ktoe ,129.8802697
+E09000017,Hillingdon,2006,Consuming Sector,Transport,Ktoe ,169.3614535
+E09000018,Hounslow,2006,Consuming Sector,Transport,Ktoe ,126.3982712
+E09000019,Islington,2006,Consuming Sector,Transport,Ktoe ,44.52922299
+E09000020,Kensington and Chelsea,2006,Consuming Sector,Transport,Ktoe ,51.74257601
+E09000021,Kingston upon Thames,2006,Consuming Sector,Transport,Ktoe ,72.07298319
+E09000022,Lambeth,2006,Consuming Sector,Transport,Ktoe ,84.28098618
+E09000023,Lewisham,2006,Consuming Sector,Transport,Ktoe ,81.88537662
+E09000024,Merton,2006,Consuming Sector,Transport,Ktoe ,52.44173799
+E09000025,Newham,2006,Consuming Sector,Transport,Ktoe ,95.46908603
+E09000026,Redbridge,2006,Consuming Sector,Transport,Ktoe ,86.84550078
+E09000027,Richmond upon Thames,2006,Consuming Sector,Transport,Ktoe ,68.16975921
+E09000028,Southwark,2006,Consuming Sector,Transport,Ktoe ,82.53878102
+E09000029,Sutton,2006,Consuming Sector,Transport,Ktoe ,53.97913625
+E09000030,Tower Hamlets,2006,Consuming Sector,Transport,Ktoe ,93.85910517
+E09000031,Waltham Forest,2006,Consuming Sector,Transport,Ktoe ,59.38424028
+E09000032,Wandsworth,2006,Consuming Sector,Transport,Ktoe ,80.48367167
+E09000033,Westminster,2006,Consuming Sector,Transport,Ktoe ,102.8519967
+E09000002,Barking and Dagenham,2007,Consuming Sector,Transport,Ktoe ,56.44364476
+E09000003,Barnet,2007,Consuming Sector,Transport,Ktoe ,126.7432493
+E09000004,Bexley,2007,Consuming Sector,Transport,Ktoe ,75.93017636
+E09000005,Brent,2007,Consuming Sector,Transport,Ktoe ,75.45363649
+E09000006,Bromley,2007,Consuming Sector,Transport,Ktoe ,104.5881628
+E09000007,Camden,2007,Consuming Sector,Transport,Ktoe ,51.20439766
+E09000001,City of London,2007,Consuming Sector,Transport,Ktoe ,19.21444254
+E09000008,Croydon,2007,Consuming Sector,Transport,Ktoe ,104.2192391
+E09000009,Ealing,2007,Consuming Sector,Transport,Ktoe ,104.7572876
+E09000010,Enfield,2007,Consuming Sector,Transport,Ktoe ,127.9094303
+E09000011,Greenwich,2007,Consuming Sector,Transport,Ktoe ,94.36254748
+E09000012,Hackney,2007,Consuming Sector,Transport,Ktoe ,55.12802157
+E09000013,Hammersmith and Fulham,2007,Consuming Sector,Transport,Ktoe ,58.94267466
+E09000014,Haringey,2007,Consuming Sector,Transport,Ktoe ,60.58044647
+E09000015,Harrow,2007,Consuming Sector,Transport,Ktoe ,49.7003412
+E09000016,Havering,2007,Consuming Sector,Transport,Ktoe ,126.874776
+E09000017,Hillingdon,2007,Consuming Sector,Transport,Ktoe ,168.0716417
+E09000018,Hounslow,2007,Consuming Sector,Transport,Ktoe ,122.5949737
+E09000019,Islington,2007,Consuming Sector,Transport,Ktoe ,44.37146438
+E09000020,Kensington and Chelsea,2007,Consuming Sector,Transport,Ktoe ,50.70494099
+E09000021,Kingston upon Thames,2007,Consuming Sector,Transport,Ktoe ,72.88338739
+E09000022,Lambeth,2007,Consuming Sector,Transport,Ktoe ,84.1160458
+E09000023,Lewisham,2007,Consuming Sector,Transport,Ktoe ,81.94716992
+E09000024,Merton,2007,Consuming Sector,Transport,Ktoe ,52.57995892
+E09000025,Newham,2007,Consuming Sector,Transport,Ktoe ,96.05706865
+E09000026,Redbridge,2007,Consuming Sector,Transport,Ktoe ,87.0318586
+E09000027,Richmond upon Thames,2007,Consuming Sector,Transport,Ktoe ,67.63646441
+E09000028,Southwark,2007,Consuming Sector,Transport,Ktoe ,84.11453621
+E09000029,Sutton,2007,Consuming Sector,Transport,Ktoe ,54.6531948
+E09000030,Tower Hamlets,2007,Consuming Sector,Transport,Ktoe ,94.38426109
+E09000031,Waltham Forest,2007,Consuming Sector,Transport,Ktoe ,59.21316015
+E09000032,Wandsworth,2007,Consuming Sector,Transport,Ktoe ,84.89039806
+E09000033,Westminster,2007,Consuming Sector,Transport,Ktoe ,98.94531385
+E09000002,Barking and Dagenham,2008,Consuming Sector,Transport,Ktoe ,52.41891706
+E09000003,Barnet,2008,Consuming Sector,Transport,Ktoe ,128.55338
+E09000004,Bexley,2008,Consuming Sector,Transport,Ktoe ,74.02712897
+E09000005,Brent,2008,Consuming Sector,Transport,Ktoe ,70.75769523
+E09000006,Bromley,2008,Consuming Sector,Transport,Ktoe ,101.9924258
+E09000007,Camden,2008,Consuming Sector,Transport,Ktoe ,50.07196438
+E09000001,City of London,2008,Consuming Sector,Transport,Ktoe ,17.97522323
+E09000008,Croydon,2008,Consuming Sector,Transport,Ktoe ,99.01841554
+E09000009,Ealing,2008,Consuming Sector,Transport,Ktoe ,103.2948038
+E09000010,Enfield,2008,Consuming Sector,Transport,Ktoe ,125.9582857
+E09000011,Greenwich,2008,Consuming Sector,Transport,Ktoe ,90.52291396
+E09000012,Hackney,2008,Consuming Sector,Transport,Ktoe ,54.35174436
+E09000013,Hammersmith and Fulham,2008,Consuming Sector,Transport,Ktoe ,55.17902763
+E09000014,Haringey,2008,Consuming Sector,Transport,Ktoe ,58.50985302
+E09000015,Harrow,2008,Consuming Sector,Transport,Ktoe ,48.71562101
+E09000016,Havering,2008,Consuming Sector,Transport,Ktoe ,124.2613933
+E09000017,Hillingdon,2008,Consuming Sector,Transport,Ktoe ,167.3660709
+E09000018,Hounslow,2008,Consuming Sector,Transport,Ktoe ,120.259886
+E09000019,Islington,2008,Consuming Sector,Transport,Ktoe ,43.24754372
+E09000020,Kensington and Chelsea,2008,Consuming Sector,Transport,Ktoe ,48.91034462
+E09000021,Kingston upon Thames,2008,Consuming Sector,Transport,Ktoe ,70.99671779
+E09000022,Lambeth,2008,Consuming Sector,Transport,Ktoe ,81.54518762
+E09000023,Lewisham,2008,Consuming Sector,Transport,Ktoe ,80.24108542
+E09000024,Merton,2008,Consuming Sector,Transport,Ktoe ,51.05352103
+E09000025,Newham,2008,Consuming Sector,Transport,Ktoe ,93.34927078
+E09000026,Redbridge,2008,Consuming Sector,Transport,Ktoe ,81.09113276
+E09000027,Richmond upon Thames,2008,Consuming Sector,Transport,Ktoe ,65.14825778
+E09000028,Southwark,2008,Consuming Sector,Transport,Ktoe ,80.42319458
+E09000029,Sutton,2008,Consuming Sector,Transport,Ktoe ,51.24423995
+E09000030,Tower Hamlets,2008,Consuming Sector,Transport,Ktoe ,91.95941221
+E09000031,Waltham Forest,2008,Consuming Sector,Transport,Ktoe ,56.17325237
+E09000032,Wandsworth,2008,Consuming Sector,Transport,Ktoe ,82.8009232
+E09000033,Westminster,2008,Consuming Sector,Transport,Ktoe ,93.54365239
+E09000002,Barking and Dagenham,2009,Consuming Sector,Transport,Ktoe ,54.4090487
+E09000003,Barnet,2009,Consuming Sector,Transport,Ktoe ,124.906292
+E09000004,Bexley,2009,Consuming Sector,Transport,Ktoe ,73.10443111
+E09000005,Brent,2009,Consuming Sector,Transport,Ktoe ,69.24271937
+E09000006,Bromley,2009,Consuming Sector,Transport,Ktoe ,99.87124052
+E09000007,Camden,2009,Consuming Sector,Transport,Ktoe ,49.81438238
+E09000001,City of London,2009,Consuming Sector,Transport,Ktoe ,16.99151693
+E09000008,Croydon,2009,Consuming Sector,Transport,Ktoe ,96.51683579
+E09000009,Ealing,2009,Consuming Sector,Transport,Ktoe ,101.1812666
+E09000010,Enfield,2009,Consuming Sector,Transport,Ktoe ,124.3954146
+E09000011,Greenwich,2009,Consuming Sector,Transport,Ktoe ,89.06980794
+E09000012,Hackney,2009,Consuming Sector,Transport,Ktoe ,53.1349495
+E09000013,Hammersmith and Fulham,2009,Consuming Sector,Transport,Ktoe ,55.62009495
+E09000014,Haringey,2009,Consuming Sector,Transport,Ktoe ,56.35510758
+E09000015,Harrow,2009,Consuming Sector,Transport,Ktoe ,47.14401304
+E09000016,Havering,2009,Consuming Sector,Transport,Ktoe ,124.7611572
+E09000017,Hillingdon,2009,Consuming Sector,Transport,Ktoe ,167.3243795
+E09000018,Hounslow,2009,Consuming Sector,Transport,Ktoe ,117.258708
+E09000019,Islington,2009,Consuming Sector,Transport,Ktoe ,42.26587877
+E09000020,Kensington and Chelsea,2009,Consuming Sector,Transport,Ktoe ,48.87402119
+E09000021,Kingston upon Thames,2009,Consuming Sector,Transport,Ktoe ,69.83179707
+E09000022,Lambeth,2009,Consuming Sector,Transport,Ktoe ,78.89795429
+E09000023,Lewisham,2009,Consuming Sector,Transport,Ktoe ,78.36644839
+E09000024,Merton,2009,Consuming Sector,Transport,Ktoe ,49.67341867
+E09000025,Newham,2009,Consuming Sector,Transport,Ktoe ,93.13363181
+E09000026,Redbridge,2009,Consuming Sector,Transport,Ktoe ,80.49425842
+E09000027,Richmond upon Thames,2009,Consuming Sector,Transport,Ktoe ,62.88709431
+E09000028,Southwark,2009,Consuming Sector,Transport,Ktoe ,79.22549604
+E09000029,Sutton,2009,Consuming Sector,Transport,Ktoe ,50.99177519
+E09000030,Tower Hamlets,2009,Consuming Sector,Transport,Ktoe ,90.40385933
+E09000031,Waltham Forest,2009,Consuming Sector,Transport,Ktoe ,55.83791617
+E09000032,Wandsworth,2009,Consuming Sector,Transport,Ktoe ,78.19268472
+E09000033,Westminster,2009,Consuming Sector,Transport,Ktoe ,89.44479608
+E09000002,Barking and Dagenham,2010,Consuming Sector,Transport,Ktoe ,52.38669468
+E09000003,Barnet,2010,Consuming Sector,Transport,Ktoe ,125.7762978
+E09000004,Bexley,2010,Consuming Sector,Transport,Ktoe ,70.56056871
+E09000005,Brent,2010,Consuming Sector,Transport,Ktoe ,72.61763445
+E09000006,Bromley,2010,Consuming Sector,Transport,Ktoe ,97.1852224
+E09000007,Camden,2010,Consuming Sector,Transport,Ktoe ,47.30961826
+E09000001,City of London,2010,Consuming Sector,Transport,Ktoe ,16.76542952
+E09000008,Croydon,2010,Consuming Sector,Transport,Ktoe ,93.65807402
+E09000009,Ealing,2010,Consuming Sector,Transport,Ktoe ,99.51083255
+E09000010,Enfield,2010,Consuming Sector,Transport,Ktoe ,122.97148
+E09000011,Greenwich,2010,Consuming Sector,Transport,Ktoe ,86.7983524
+E09000012,Hackney,2010,Consuming Sector,Transport,Ktoe ,52.8220741
+E09000013,Hammersmith and Fulham,2010,Consuming Sector,Transport,Ktoe ,53.77477887
+E09000014,Haringey,2010,Consuming Sector,Transport,Ktoe ,54.81513058
+E09000015,Harrow,2010,Consuming Sector,Transport,Ktoe ,45.68023861
+E09000016,Havering,2010,Consuming Sector,Transport,Ktoe ,119.5808505
+E09000017,Hillingdon,2010,Consuming Sector,Transport,Ktoe ,163.3173151
+E09000018,Hounslow,2010,Consuming Sector,Transport,Ktoe ,114.1171132
+E09000019,Islington,2010,Consuming Sector,Transport,Ktoe ,40.86322126
+E09000020,Kensington and Chelsea,2010,Consuming Sector,Transport,Ktoe ,47.85817939
+E09000021,Kingston upon Thames,2010,Consuming Sector,Transport,Ktoe ,72.60837926
+E09000022,Lambeth,2010,Consuming Sector,Transport,Ktoe ,76.07835219
+E09000023,Lewisham,2010,Consuming Sector,Transport,Ktoe ,76.4115802
+E09000024,Merton,2010,Consuming Sector,Transport,Ktoe ,48.75724925
+E09000025,Newham,2010,Consuming Sector,Transport,Ktoe ,89.26927743
+E09000026,Redbridge,2010,Consuming Sector,Transport,Ktoe ,79.46538984
+E09000027,Richmond upon Thames,2010,Consuming Sector,Transport,Ktoe ,61.36178059
+E09000028,Southwark,2010,Consuming Sector,Transport,Ktoe ,76.65624165
+E09000029,Sutton,2010,Consuming Sector,Transport,Ktoe ,48.97087352
+E09000030,Tower Hamlets,2010,Consuming Sector,Transport,Ktoe ,90.03070534
+E09000031,Waltham Forest,2010,Consuming Sector,Transport,Ktoe ,55.22331404
+E09000032,Wandsworth,2010,Consuming Sector,Transport,Ktoe ,77.40925866
+E09000033,Westminster,2010,Consuming Sector,Transport,Ktoe ,88.48617
+E09000002,Barking and Dagenham,2011,Consuming Sector,Transport,Ktoe ,52.77580655
+E09000003,Barnet,2011,Consuming Sector,Transport,Ktoe ,118.7185511
+E09000004,Bexley,2011,Consuming Sector,Transport,Ktoe ,68.26029029
+E09000005,Brent,2011,Consuming Sector,Transport,Ktoe ,69.85716776
+E09000006,Bromley,2011,Consuming Sector,Transport,Ktoe ,95.4689019
+E09000007,Camden,2011,Consuming Sector,Transport,Ktoe ,45.8135182
+E09000001,City of London,2011,Consuming Sector,Transport,Ktoe ,16.29122493
+E09000008,Croydon,2011,Consuming Sector,Transport,Ktoe ,92.26935864
+E09000009,Ealing,2011,Consuming Sector,Transport,Ktoe ,99.29374279
+E09000010,Enfield,2011,Consuming Sector,Transport,Ktoe ,116.2861927
+E09000011,Greenwich,2011,Consuming Sector,Transport,Ktoe ,86.91544452
+E09000012,Hackney,2011,Consuming Sector,Transport,Ktoe ,50.00210334
+E09000013,Hammersmith and Fulham,2011,Consuming Sector,Transport,Ktoe ,51.15690888
+E09000014,Haringey,2011,Consuming Sector,Transport,Ktoe ,53.61444318
+E09000015,Harrow,2011,Consuming Sector,Transport,Ktoe ,45.58318838
+E09000016,Havering,2011,Consuming Sector,Transport,Ktoe ,122.1541947
+E09000017,Hillingdon,2011,Consuming Sector,Transport,Ktoe ,157.0986904
+E09000018,Hounslow,2011,Consuming Sector,Transport,Ktoe ,112.2070507
+E09000019,Islington,2011,Consuming Sector,Transport,Ktoe ,39.83816576
+E09000020,Kensington and Chelsea,2011,Consuming Sector,Transport,Ktoe ,46.80548374
+E09000021,Kingston upon Thames,2011,Consuming Sector,Transport,Ktoe ,67.64954557
+E09000022,Lambeth,2011,Consuming Sector,Transport,Ktoe ,74.00412703
+E09000023,Lewisham,2011,Consuming Sector,Transport,Ktoe ,74.76998302
+E09000024,Merton,2011,Consuming Sector,Transport,Ktoe ,47.04275582
+E09000025,Newham,2011,Consuming Sector,Transport,Ktoe ,85.84637357
+E09000026,Redbridge,2011,Consuming Sector,Transport,Ktoe ,85.17016124
+E09000027,Richmond upon Thames,2011,Consuming Sector,Transport,Ktoe ,60.05821098
+E09000028,Southwark,2011,Consuming Sector,Transport,Ktoe ,74.74714517
+E09000029,Sutton,2011,Consuming Sector,Transport,Ktoe ,47.96373469
+E09000030,Tower Hamlets,2011,Consuming Sector,Transport,Ktoe ,86.00774381
+E09000031,Waltham Forest,2011,Consuming Sector,Transport,Ktoe ,52.48499391
+E09000032,Wandsworth,2011,Consuming Sector,Transport,Ktoe ,74.11528129
+E09000033,Westminster,2011,Consuming Sector,Transport,Ktoe ,84.90861465
+E09000002,Barking and Dagenham,2012,Consuming Sector,Transport,Ktoe ,50.5304888
+E09000003,Barnet,2012,Consuming Sector,Transport,Ktoe ,121.0630032
+E09000004,Bexley,2012,Consuming Sector,Transport,Ktoe ,67.9267426
+E09000005,Brent,2012,Consuming Sector,Transport,Ktoe ,69.60640216
+E09000006,Bromley,2012,Consuming Sector,Transport,Ktoe ,93.54002991
+E09000007,Camden,2012,Consuming Sector,Transport,Ktoe ,43.96251763
+E09000001,City of London,2012,Consuming Sector,Transport,Ktoe ,15.80291982
+E09000008,Croydon,2012,Consuming Sector,Transport,Ktoe ,90.75920481
+E09000009,Ealing,2012,Consuming Sector,Transport,Ktoe ,95.81436826
+E09000010,Enfield,2012,Consuming Sector,Transport,Ktoe ,122.1589579
+E09000011,Greenwich,2012,Consuming Sector,Transport,Ktoe ,84.27769033
+E09000012,Hackney,2012,Consuming Sector,Transport,Ktoe ,48.77186505
+E09000013,Hammersmith and Fulham,2012,Consuming Sector,Transport,Ktoe ,48.38249097
+E09000014,Haringey,2012,Consuming Sector,Transport,Ktoe ,52.64641035
+E09000015,Harrow,2012,Consuming Sector,Transport,Ktoe ,45.53378499
+E09000016,Havering,2012,Consuming Sector,Transport,Ktoe ,119.0973302
+E09000017,Hillingdon,2012,Consuming Sector,Transport,Ktoe ,159.4884886
+E09000018,Hounslow,2012,Consuming Sector,Transport,Ktoe ,111.9675437
+E09000019,Islington,2012,Consuming Sector,Transport,Ktoe ,39.03680012
+E09000020,Kensington and Chelsea,2012,Consuming Sector,Transport,Ktoe ,45.19538565
+E09000021,Kingston upon Thames,2012,Consuming Sector,Transport,Ktoe ,66.09138546
+E09000022,Lambeth,2012,Consuming Sector,Transport,Ktoe ,70.47684529
+E09000023,Lewisham,2012,Consuming Sector,Transport,Ktoe ,72.54621104
+E09000024,Merton,2012,Consuming Sector,Transport,Ktoe ,46.18292563
+E09000025,Newham,2012,Consuming Sector,Transport,Ktoe ,85.31486753
+E09000026,Redbridge,2012,Consuming Sector,Transport,Ktoe ,84.03046366
+E09000027,Richmond upon Thames,2012,Consuming Sector,Transport,Ktoe ,60.46705821
+E09000028,Southwark,2012,Consuming Sector,Transport,Ktoe ,71.00535
+E09000029,Sutton,2012,Consuming Sector,Transport,Ktoe ,46.81376118
+E09000030,Tower Hamlets,2012,Consuming Sector,Transport,Ktoe ,82.24914939
+E09000031,Waltham Forest,2012,Consuming Sector,Transport,Ktoe ,53.7448765
+E09000032,Wandsworth,2012,Consuming Sector,Transport,Ktoe ,73.13874485
+E09000033,Westminster,2012,Consuming Sector,Transport,Ktoe ,84.27788499
+E09000002,Barking and Dagenham,2013,Consuming Sector,Transport,Ktoe ,51.25462626
+E09000003,Barnet,2013,Consuming Sector,Transport,Ktoe ,121.5539905
+E09000004,Bexley,2013,Consuming Sector,Transport,Ktoe ,66.43550101
+E09000005,Brent,2013,Consuming Sector,Transport,Ktoe ,66.48682359
+E09000006,Bromley,2013,Consuming Sector,Transport,Ktoe ,92.56838451
+E09000007,Camden,2013,Consuming Sector,Transport,Ktoe ,43.17271928
+E09000001,City of London,2013,Consuming Sector,Transport,Ktoe ,15.64713015
+E09000008,Croydon,2013,Consuming Sector,Transport,Ktoe ,90.3183739
+E09000009,Ealing,2013,Consuming Sector,Transport,Ktoe ,99.48517026
+E09000010,Enfield,2013,Consuming Sector,Transport,Ktoe ,119.8495308
+E09000011,Greenwich,2013,Consuming Sector,Transport,Ktoe ,82.28273919
+E09000012,Hackney,2013,Consuming Sector,Transport,Ktoe ,47.06895351
+E09000013,Hammersmith and Fulham,2013,Consuming Sector,Transport,Ktoe ,49.53205157
+E09000014,Haringey,2013,Consuming Sector,Transport,Ktoe ,52.20859872
+E09000015,Harrow,2013,Consuming Sector,Transport,Ktoe ,44.43362899
+E09000016,Havering,2013,Consuming Sector,Transport,Ktoe ,120.6477341
+E09000017,Hillingdon,2013,Consuming Sector,Transport,Ktoe ,159.9911574
+E09000018,Hounslow,2013,Consuming Sector,Transport,Ktoe ,110.7559299
+E09000019,Islington,2013,Consuming Sector,Transport,Ktoe ,38.03059141
+E09000020,Kensington and Chelsea,2013,Consuming Sector,Transport,Ktoe ,44.03724683
+E09000021,Kingston upon Thames,2013,Consuming Sector,Transport,Ktoe ,65.13534974
+E09000022,Lambeth,2013,Consuming Sector,Transport,Ktoe ,69.12024963
+E09000023,Lewisham,2013,Consuming Sector,Transport,Ktoe ,70.33582747
+E09000024,Merton,2013,Consuming Sector,Transport,Ktoe ,45.35212333
+E09000025,Newham,2013,Consuming Sector,Transport,Ktoe ,79.66566926
+E09000026,Redbridge,2013,Consuming Sector,Transport,Ktoe ,81.20309231
+E09000027,Richmond upon Thames,2013,Consuming Sector,Transport,Ktoe ,58.8967843
+E09000028,Southwark,2013,Consuming Sector,Transport,Ktoe ,69.4015554
+E09000029,Sutton,2013,Consuming Sector,Transport,Ktoe ,46.02025415
+E09000030,Tower Hamlets,2013,Consuming Sector,Transport,Ktoe ,81.66241544
+E09000031,Waltham Forest,2013,Consuming Sector,Transport,Ktoe ,53.91811851
+E09000032,Wandsworth,2013,Consuming Sector,Transport,Ktoe ,70.68683039
+E09000033,Westminster,2013,Consuming Sector,Transport,Ktoe ,83.26288198
+E09000002,Barking and Dagenham,2014,Consuming Sector,Transport,Ktoe ,52.98207865
+E09000003,Barnet,2014,Consuming Sector,Transport,Ktoe ,123.0584497
+E09000004,Bexley,2014,Consuming Sector,Transport,Ktoe ,67.11724293
+E09000005,Brent,2014,Consuming Sector,Transport,Ktoe ,69.50033623
+E09000006,Bromley,2014,Consuming Sector,Transport,Ktoe ,93.08755126
+E09000007,Camden,2014,Consuming Sector,Transport,Ktoe ,44.73914871
+E09000001,City of London,2014,Consuming Sector,Transport,Ktoe ,17.06801814
+E09000008,Croydon,2014,Consuming Sector,Transport,Ktoe ,90.4531864
+E09000009,Ealing,2014,Consuming Sector,Transport,Ktoe ,97.59877327
+E09000010,Enfield,2014,Consuming Sector,Transport,Ktoe ,121.9150938
+E09000011,Greenwich,2014,Consuming Sector,Transport,Ktoe ,82.82532355
+E09000012,Hackney,2014,Consuming Sector,Transport,Ktoe ,47.16303697
+E09000013,Hammersmith and Fulham,2014,Consuming Sector,Transport,Ktoe ,49.15867846
+E09000014,Haringey,2014,Consuming Sector,Transport,Ktoe ,52.78295811
+E09000015,Harrow,2014,Consuming Sector,Transport,Ktoe ,44.19428512
+E09000016,Havering,2014,Consuming Sector,Transport,Ktoe ,123.5526895
+E09000017,Hillingdon,2014,Consuming Sector,Transport,Ktoe ,161.0010586
+E09000018,Hounslow,2014,Consuming Sector,Transport,Ktoe ,112.773397
+E09000019,Islington,2014,Consuming Sector,Transport,Ktoe ,38.5940741
+E09000020,Kensington and Chelsea,2014,Consuming Sector,Transport,Ktoe ,47.73004249
+E09000021,Kingston upon Thames,2014,Consuming Sector,Transport,Ktoe ,64.2709722
+E09000022,Lambeth,2014,Consuming Sector,Transport,Ktoe ,69.9765321
+E09000023,Lewisham,2014,Consuming Sector,Transport,Ktoe ,70.60168099
+E09000024,Merton,2014,Consuming Sector,Transport,Ktoe ,44.84656968
+E09000025,Newham,2014,Consuming Sector,Transport,Ktoe ,84.895651
+E09000026,Redbridge,2014,Consuming Sector,Transport,Ktoe ,82.51087889
+E09000027,Richmond upon Thames,2014,Consuming Sector,Transport,Ktoe ,58.6678087
+E09000028,Southwark,2014,Consuming Sector,Transport,Ktoe ,70.3985378
+E09000029,Sutton,2014,Consuming Sector,Transport,Ktoe ,46.35005911
+E09000030,Tower Hamlets,2014,Consuming Sector,Transport,Ktoe ,83.30884274
+E09000031,Waltham Forest,2014,Consuming Sector,Transport,Ktoe ,57.27073376
+E09000032,Wandsworth,2014,Consuming Sector,Transport,Ktoe ,69.85045843
+E09000033,Westminster,2014,Consuming Sector,Transport,Ktoe ,88.84973002
+E09000002,Barking and Dagenham,2015,Consuming Sector,Transport,Ktoe ,53.41076809
+E09000003,Barnet,2015,Consuming Sector,Transport,Ktoe ,122.0967465
+E09000004,Bexley,2015,Consuming Sector,Transport,Ktoe ,67.9041176
+E09000005,Brent,2015,Consuming Sector,Transport,Ktoe ,67.78238712
+E09000006,Bromley,2015,Consuming Sector,Transport,Ktoe ,92.15826039
+E09000007,Camden,2015,Consuming Sector,Transport,Ktoe ,45.86760287
+E09000001,City of London,2015,Consuming Sector,Transport,Ktoe ,17.67325232
+E09000008,Croydon,2015,Consuming Sector,Transport,Ktoe ,88.842347
+E09000009,Ealing,2015,Consuming Sector,Transport,Ktoe ,97.89054602
+E09000010,Enfield,2015,Consuming Sector,Transport,Ktoe ,128.8752733
+E09000011,Greenwich,2015,Consuming Sector,Transport,Ktoe ,81.92359352
+E09000012,Hackney,2015,Consuming Sector,Transport,Ktoe ,46.41001724
+E09000013,Hammersmith and Fulham,2015,Consuming Sector,Transport,Ktoe ,49.91949101
+E09000014,Haringey,2015,Consuming Sector,Transport,Ktoe ,53.36022519
+E09000015,Harrow,2015,Consuming Sector,Transport,Ktoe ,43.54855962
+E09000016,Havering,2015,Consuming Sector,Transport,Ktoe ,126.7494646
+E09000017,Hillingdon,2015,Consuming Sector,Transport,Ktoe ,156.7540378
+E09000018,Hounslow,2015,Consuming Sector,Transport,Ktoe ,111.2088927
+E09000019,Islington,2015,Consuming Sector,Transport,Ktoe ,38.454922
+E09000020,Kensington and Chelsea,2015,Consuming Sector,Transport,Ktoe ,47.82586319
+E09000021,Kingston upon Thames,2015,Consuming Sector,Transport,Ktoe ,63.51382705
+E09000022,Lambeth,2015,Consuming Sector,Transport,Ktoe ,70.94102287
+E09000023,Lewisham,2015,Consuming Sector,Transport,Ktoe ,72.27154913
+E09000024,Merton,2015,Consuming Sector,Transport,Ktoe ,43.87452489
+E09000025,Newham,2015,Consuming Sector,Transport,Ktoe ,86.79049238
+E09000026,Redbridge,2015,Consuming Sector,Transport,Ktoe ,82.47148899
+E09000027,Richmond upon Thames,2015,Consuming Sector,Transport,Ktoe ,57.84276003
+E09000028,Southwark,2015,Consuming Sector,Transport,Ktoe ,69.61979436
+E09000029,Sutton,2015,Consuming Sector,Transport,Ktoe ,45.56083586
+E09000030,Tower Hamlets,2015,Consuming Sector,Transport,Ktoe ,80.75828746
+E09000031,Waltham Forest,2015,Consuming Sector,Transport,Ktoe ,55.66682052
+E09000032,Wandsworth,2015,Consuming Sector,Transport,Ktoe ,70.15685592
+E09000033,Westminster,2015,Consuming Sector,Transport,Ktoe ,90.93498787

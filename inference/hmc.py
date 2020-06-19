@@ -1,5 +1,5 @@
 """
-HMC scheme to sample from prior for latent variables of doubly constrained model.
+HMC scheme to sample from prior for latent variables of spatial interaction model
 """
 
 import os
@@ -36,13 +36,13 @@ def get_project_root():
 # Append project root directory to path
 sys.path.append(get_project_root())
 
-# Import Doubly constrained model
-from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='HMC scheme to sample from prior for latent variables of doubly constrained model.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
                     help="Name of dataset (this is the directory name in data/input)")
+parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
+                    help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 2.0,
                     help="Alpha parameter in potential function.")
 parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.3*0.7e6,
@@ -68,6 +68,17 @@ print(json.dumps(vars(args), indent = 2))
 # Define dataset directory
 dataset = args.dataset_name
 
+# Define type of spatial interaction model
+constrained = args.constrained
+
+# Import selected type of spatial interaction model
+if constrained == 'singly':
+    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
+elif constrained == 'doubly':
+    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+else:
+    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
+
 # Get project directory
 wd = get_project_root()
 
@@ -76,6 +87,9 @@ si = SpatialIteraction(dataset)
 
 # Normalise data
 si.normalise_data()
+
+# Fix random seed
+np.random.seed(888)
 
 # Set theta for high-noise model's potential value parameters
 theta = [0 for i in range(6)]
@@ -95,12 +109,13 @@ L = args.L
 epsilon = args.epsilon
 
 
-# Set-up MCMC
-mcmc_n = args.mcmc_n
-temp_n = 5
-
 # Inverse temperatures that go into potential energy of Hamiltonian dynamics
 inverse_temperatures = np.array([1., 1./2., 1./4., 1./8., 1./16.])
+
+# Set-up MCMC
+mcmc_n = args.mcmc_n
+temp_n = len(inverse_temperatures)
+
 # Array to store X values sampled at each iteration
 samples = np.empty((mcmc_n, si.M))
 
@@ -128,7 +143,9 @@ for i in tqdm(range(mcmc_n)):
 
         ''' HMC parameter/function correspondence to spatial interaction model
         q = x - position = log destination sizes
-        U(x) = V(x|theta)*(1/T) -  potential energy = potential value given parameter theta
+        U(x) = gamma*V(x|theta)*(1/T) -  potential energy = potential value given parameter theta times inverse temperature
+
+        Note that the potential value function returns gamma*V(x|theta)
         '''
 
         # X-Proposal (position q is the log size vector X)
@@ -192,9 +209,9 @@ for i in tqdm(range(mcmc_n)):
     samples[i] = xx[0]
 
     # Savedown and output details every 100 iterations
-    if (i+1) % 100 == 0:
+    if (i+1) % (int(0.05*args.mcmc_n)) == 0:
         print("Saving iteration " + str(i+1))
-        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/hmc_samples_{str(theta[0])}.txt"), samples)
+        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(theta[0])}.txt"), samples)
         print("X AR:")
         print(ac/pc)
         print("Swap AR:" + str(float(acs)/float(pcs)))

@@ -53,9 +53,9 @@ parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
                     help="Epsilon parameter")
 parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
                     help="Flag for showing resulting figure.")
-parser.add_argument("-gmin", "--grid_min",nargs='?',type=int,default = -20.,
+parser.add_argument("-gmin", "--grid_min",nargs='?',type=float,default = -20.,
                     help="Smallest log destination W_j (x_j) to evaluate potential value.")
-parser.add_argument("-gmax", "--grid_max",nargs='?',type=int,default = .2,
+parser.add_argument("-gmax", "--grid_max",nargs='?',type=float,default = .2,
                     help="Largest log destination W_j (x_j) to evaluate potential value.")
 parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
                     help="Number of points (n^2) to evaluate potential function")
@@ -73,16 +73,17 @@ constrained = args.constrained
 # Import selected type of spatial interaction model
 if constrained == 'singly':
     from models.singly_constrained.spatial_interaction_model import SpatialIteraction
+    # Instantiate SpatialIteraction
+    si = SpatialIteraction(dataset,mode)
 elif constrained == 'doubly':
     from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+    # Instantiate SpatialIteraction
+    si = SpatialIteraction(dataset)
 else:
     raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Get project directory
 wd = get_project_root()
-
-# Instantiate UrbanModel
-si = SpatialIteraction(mode,dataset)
 
 # Normalise necessary data for learning
 si.normalise_data()
@@ -141,14 +142,14 @@ plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gam
 # plt.tight_layout()
 
 # Save figure to output
-plt.savefig(os.path.join(wd,'data/output/{}/inverse_problem/figures/2d_{}_potential_function.png'.format(dataset,constrained)))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function.png'))
 
 # Show figure if instructed
 if args.show_figure:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(wd,'data/output/{}/inverse_problem/figures/2d_{}_potential_function_parameters.json'.format(dataset,constrained)), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function_parameters.json'), 'w') as outfile:
     json.dump(vars(args), outfile)
 
-print('Figure saved to {}'.format(os.path.join(wd,'data/output/{}/inverse_problem/figures/2d_{}_potential_function.png'.format(dataset,constrained))))
+print('Figure saved to {}'.format(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function.png')))

@@ -33,7 +33,7 @@ sys.path.append(get_project_root())
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
-parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-m", "--mode",nargs='?',type=str,default = 'stochastic',
                     help="Mode of evaluation (stochastic/determinstic)")

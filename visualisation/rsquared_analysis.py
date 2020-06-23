@@ -36,7 +36,7 @@ sys.path.append(get_project_root())
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='R^2 analysis to find fitted parameters based on potential function minima.')
-parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-m", "--mode",nargs='?',type=str,default = 'stochastic',
                     help="Mode of evaluation (stochastic/determinstic)")
@@ -92,13 +92,14 @@ if constrained == 'singly':
     beta_values = np.linspace(args.bmin, args.bmax, grid_n+1)[1:]
     XX, YY = np.meshgrid(alpha_values, beta_values)
     r2_values = np.zeros((grid_n, grid_n))
+    potentials = np.zeros((grid_n, grid_n))
 
     # Define theta parameters
     theta = np.array([alpha_values[0], beta_values[0], args.delta/si.M, args.gamma, args.kappa, args.epsilon])
 
     # Search values
     last_r2 = -np.infty
-    max_potential = -np.infty
+    last_potential = -np.infty
 
     # Normalise initial log destination sizes
     si.normalise_data()
@@ -116,8 +117,11 @@ if constrained == 'singly':
                 # Residiual sum squares
                 theta[0] = XX[i, j]
                 theta[1] = YY[i, j]
-                # print('alpha =',theta[0],'beta =',theta[1],'delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
                 w_pred = np.exp(minimize(si.potential_value, xd, method='L-BFGS-B', jac=True, args=(theta), options={'disp': False}).x)
+
+                # print('alpha =',theta[0],'beta =',theta[1],'delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
+                # print('Potential function:', si.potential_value(xd,theta)[0])
+                # print('Potential function gradient:', si.potential_value(xd,theta)[1])
                 res = w_pred - w_data
                 ss_res = np.dot(res, res)
 
@@ -130,34 +134,44 @@ if constrained == 'singly':
             # If minimize fails set value to previous, otherwise update previous
             if r2_values[i, j] == 0:
                 r2_values[i, j] = last_r2
+                potentials[i, j] = si.potential_value(np.log(w_pred),theta)[0]
             else:
                 last_r2 = r2_values[i, j]
+                last_potential = potentials[i, j]
 
-            # Update maximum potential
-            current_potential =  si.potential_value(np.log(w_pred),theta)[0]
-            if max_potential <= current_potential:
-                max_potential = current_potential
 
     # Output results
     idx = np.unravel_index(r2_values.argmax(), r2_values.shape)
+
     print("Fitted alpha and beta values:")
     print(XX[idx], YY[idx]*args.amax/(args.bmax))
-    print("R^2 and max potential values:")
-    print(r2_values[idx],max_potential)
+    print("R^2 and potential value:")
+    print(r2_values[idx],potentials[idx])
+
+    # Save R^2 to file
     np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_rsquared_analysis_{str(int(args.gamma))}.txt"), r2_values)
+
+    # Plot options
+    plt.style.use('classic')
+    fig = plt.figure(figsize=(8,8))
+    fig.tight_layout(pad=0.5)
+
+    # Plot R^2
     plt.pcolor(XX, YY*args.amax/(args.bmax), r2_values)
     plt.xlim([np.min(XX), np.max(XX)])
     plt.ylim([np.min(YY)*args.amax/(args.bmax), np.max(YY)*args.amax/(args.bmax)])
     plt.colorbar()
     plt.ylabel("Parameter beta")
     plt.xlabel("Parameter alpha")
+
+    # Save figure to file
     plt.savefig(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_rsquared_analysis_gamma_{str(int(args.gamma))}.png'))
 
     # Save fitted values to parameters
     arguments['fitted_alpha'] = XX[idx]
     arguments['fitted_beta'] = YY[idx]*args.amax/(args.bmax)
     arguments['R^2'] = r2_values[idx]
-    arguments['max_potential'] = max_potential
+    arguments['potential'] = potentials[idx]
 
     # Save parameters to file
     with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_rsquared_analysis_gamma_{str(int(args.gamma))}_parameters.json'), 'w') as outfile:
@@ -166,6 +180,8 @@ if constrained == 'singly':
     # Show figure if requested
     if args.show_figure:
         plt.show()
+
+
 elif constrained == 'doubly':
     from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
 
@@ -176,6 +192,7 @@ elif constrained == 'doubly':
     grid_n = args.grid_size
     alpha_values = np.linspace(args.amin, args.amax, grid_n+1)[1:]
     r2_values = np.zeros((grid_n))
+    potentials = np.zeros((grid_n))
 
     # Search values
     last_r2 = -np.infty
@@ -212,13 +229,10 @@ elif constrained == 'doubly':
         # If minimize fails set value to previous, otherwise update previous
         if r2_values[i] == 0:
             r2_values[i] = last_r2
+            potentials[i, j] = si.potential_value(np.log(w_pred),theta)[0]
         else:
-            last_r2 = r2_values[i]
-
-        # Update maximum potential
-        current_potential =  si.potential_value(np.log(w_pred),theta)[0]
-        if max_potential <= current_potential:
-            max_potential = current_potential
+            last_r2 = r2_values[i, j]
+            last_potential = potentials[i, j]
 
     # Output results
     idx = np.unravel_index(r2_values.argmax(), r2_values.shape)
@@ -232,6 +246,8 @@ elif constrained == 'doubly':
 
     # Plot options
     plt.style.use('classic')
+    fig = plt.figure(figsize=(8,8))
+    fig.tight_layout(pad=0.5)
 
     # Plot R^2
     plt.plot(alpha_values, r2_values)

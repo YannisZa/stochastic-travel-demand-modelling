@@ -38,7 +38,7 @@ sys.path.append(get_project_root())
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Visualisation of inverse problem results. See result argument below for more info.')
-parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")

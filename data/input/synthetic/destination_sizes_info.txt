@@ -1,0 +1,4 @@
+destination_sizes_data_filepath,../data/input/synthetic
+destination_sizes_variable,dummy
+initial_destination_sizes_year,0
+final_destination_sizes_year,5

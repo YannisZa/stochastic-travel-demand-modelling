@@ -39,7 +39,7 @@ sys.path.append(get_project_root())
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='HMC scheme to sample from prior for latent variables of doubly constrained model.')
-parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter','retail','transport'],default = 'commuter',
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
@@ -73,17 +73,17 @@ constrained = args.constrained
 
 # Import selected type of spatial interaction model
 if constrained == 'singly':
-    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
+    from models.singly_constrained.spatial_interaction_model import SpatialInteraction
 elif constrained == 'doubly':
-    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+    from models.doubly_constrained.spatial_interaction_model import SpatialInteraction
 else:
     raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Get project directory
 wd = get_project_root()
 
-# Instantiate SpatialIteraction
-si = SpatialIteraction(dataset)
+# Instantiate SpatialInteraction
+si = SpatialInteraction(dataset)
 
 # Normalise data
 si.normalise_data()

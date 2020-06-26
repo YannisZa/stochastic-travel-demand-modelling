@@ -1,4 +1,7 @@
 destination_sizes_data_filepath,../data/input/synthetic
 destination_sizes_variable,dummy
 initial_destination_sizes_year,0
-final_destination_sizes_year,5
+true_alpha,1.5
+true_beta,4
+true_delta,0
+true_kappa,1

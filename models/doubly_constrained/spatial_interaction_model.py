@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from numpy.ctypeslib import ndpointer
+from scipy.optimize import minimize
 
-
-class SpatialIteraction():
-    """ Object including flow (O/D) matrix inference routines.
+class SpatialInteraction():
+    """ Object including flow (O/D) matrix inference routines of doubly constrained SIM.
 
     Parameters
     ----------
@@ -100,44 +100,62 @@ class SpatialIteraction():
 
         # Import ordered names of origins
         origins_file = os.path.join(self.data_directory,'origins.txt')
-        self.origins = np.loadtxt(origins_file,dtype=str)
+        self.origins = np.loadtxt(origins_file,dtype=str,ndmin=1)
 
         # Import ordered names of destinations
         destinations_file = os.path.join(self.data_directory,'destinations.txt')
-        self.destinations = np.loadtxt(destinations_file,dtype=str)
-
-        # Import cost matrix
-        costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
-        self.cost_matrix = np.loadtxt(costmatrix_file)
+        self.destinations = np.loadtxt(destinations_file,dtype=str,ndmin=1)
 
         # Import origin supply
         originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
-        self.origin_supply = np.loadtxt(originsupply_file)
+        self.origin_supply = np.loadtxt(originsupply_file,ndmin=1).astype('float64')
+
+        # In case origin supply is not a list
+        print(type(self.origin_supply))
+        print(self.origin_supply.shape)
+        if not isinstance(self.origin_supply,(np.ndarray, np.generic)):
+            self.origin_supply = np.array([self.origin_supply])
 
         # Import destination demand
         destinationdemand_file = os.path.join(self.data_directory,'destination_demand.txt')
-        self.destination_demand = np.loadtxt(destinationdemand_file)
+        self.destination_demand = np.loadtxt(destinationdemand_file,ndmin=1).astype('float64')
+
+        # In case destination demand is not a list
+        if not isinstance(self.destination_demand,(np.ndarray, np.generic)):
+            self.destination_demand = np.array([self.destination_demand])
 
         # Import origin locations
         originlocations_file = os.path.join(self.data_directory,'origin_locations.txt')
-        self.origin_locations = np.loadtxt(originlocations_file)
+        self.origin_locations = np.loadtxt(originlocations_file,ndmin=1)
 
         # Import destination locations
         destinationlocations_file = os.path.join(self.data_directory,'destination_locations.txt')
-        self.destination_locations = np.loadtxt(destinationlocations_file)
+        self.destination_locations = np.loadtxt(destinationlocations_file,ndmin=1)
 
         # Import initial and final destination sizes
         initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
-        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file)
-        finaldestinationsizes_file = os.path.join(self.data_directory,'final_destination_sizes.txt')
-        self.final_destination_sizes = np.loadtxt(finaldestinationsizes_file)
+        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file,ndmin=1)
+
+        # In case destination sizes are not a list
+        if not isinstance(self.initial_destination_sizes,(np.ndarray, np.generic)):
+            self.initial_destination_sizes = np.array([self.initial_destination_sizes])
 
         # Import N,M
-        self.N, self.M = self.cost_matrix.shape
+        self.N = self.origin_supply.shape[0]
+        self.M = self.initial_destination_sizes.shape[0]
+
+        # Import cost matrix
+        costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
+        self.cost_matrix = np.loadtxt(costmatrix_file).astype('float64')
+
+        # Reshape cost matrix if necessary
+        if self.N == 1:
+            self.cost_matrix = np.reshape(self.cost_matrix[:,np.newaxis],(self.N,self.M))
+        if self.M == 1:
+            self.cost_matrix = np.reshape(self.cost_matrix[np.newaxis,:],(self.N,self.M))
 
         # Compute total initial and final destination sizes
         self.total_initial_sizes = np.sum(self.initial_destination_sizes)
-        self.total_final_sizes = np.sum(self.final_destination_sizes)
 
         # Compute naive total cost
         self.total_cost = 0
@@ -174,8 +192,8 @@ class SpatialIteraction():
                 od_data = od_data.append(new_row, ignore_index=True)
 
         # Get flatten data and et column types appropriately
-        orig_supply_flat = od_data.OriginSupply.values.astype('int64')
-        dest_demand_flat = od_data.DestinationDemand.values.astype('int64')
+        orig_supply_flat = od_data.OriginSupply.values.astype('float64')
+        dest_demand_flat = od_data.DestinationDemand.values.astype('float64')
         cost_flat = od_data.Cost.values.astype('float64')
 
         return orig_supply_flat,dest_demand_flat,cost_flat
@@ -220,9 +238,6 @@ class SpatialIteraction():
         # Normalise initial destination sizes
         self.normalised_initial_destination_sizes = self.normalise(self.initial_destination_sizes,True)
 
-        # Normalise final destination sizes
-        self.normalised_final_destination_sizes = self.normalise(self.final_destination_sizes,True)
-
 
     def load_c_functions(self):
         """ Stores C functions that infer flows to global variables.
@@ -243,8 +258,8 @@ class SpatialIteraction():
         self.infer_flows_dsf_procedure = lib.infer_flows_dsf_procedure
         self.infer_flows_dsf_procedure.restype = ctypes.c_double
         self.infer_flows_dsf_procedure.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ctypes.c_size_t,
                                                     ctypes.c_size_t,
@@ -260,8 +275,8 @@ class SpatialIteraction():
         self.infer_flows_newton_raphson.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ctypes.c_double,
                                                     ctypes.c_size_t,
@@ -273,8 +288,8 @@ class SpatialIteraction():
         self.infer_flows_ipf_procedure = lib.infer_flows_ipf_procedure
         self.infer_flows_ipf_procedure.restype = ctypes.c_double
         self.infer_flows_ipf_procedure.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
-                                                    ndpointer(ctypes.c_int, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                                                     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -410,15 +425,15 @@ class SpatialIteraction():
         theta = np.array([params['alpha'],params['beta']])
 
         # Define A and B vectors
-        A_vec = np.ones(self.N)*params['A_factor']
-        B_vec = np.ones(self.M)*params['B_factor']
+        A_vec = np.ones(self.N)*params['A_factor'].astype('float64')
+        B_vec = np.ones(self.M)*params['B_factor'].astype('float64')
 
         # Infer flows
         inferred_flows = self.infer_flows_ipf_procedure(flows,
                                                         self.origin_supply,
                                                         self.destination_demand,
                                                         self.cost_matrix,
-                                                        self.final_destination_sizes,
+                                                        self.initial_destination_sizes,
                                                         A_vec,
                                                         B_vec,
                                                         self.N,
@@ -512,6 +527,40 @@ class SpatialIteraction():
         gradV = -gaM*(delta+1./self.M)*np.ones(self.M) + gaM_kk_exp_xx
         V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
         return V, gradV
+
+
+    def reconstruct_flow_matrix(self,xd,theta):
+        """ Reconstruct flow matrices
+
+        Parameters
+        ----------
+        xd : np.array
+            Log destination sizes.
+        theta : np.array
+            Fitted parameters.
+
+        Returns
+        -------
+        np.array
+            Estimated flow matrix.
+
+        """
+
+        # Estimated destination sizes
+        xhat = np.exp(minimize(self.potential_value, xd, method='L-BFGS-B', jac=True, args=(theta), options={'disp': False}).x)
+        # Estimated flows
+        That = np.zeros((self.N,self.M))
+        # Construct flow matrix
+        for i in range(self.N):
+            for j in range(self.M):
+                _sum = 0
+                # Compute denominator
+                for jj in range(self.M):
+                    _sum += np.exp(theta[0]*xhat[j]-theta[1]*self.normalised_cost_matrix[i,jj])
+                # Compute estimated flow
+                That[i,j] = self.normalised_origin_supply[i]*np.exp(theta[0]*xhat[j]-theta[1]*self.normalised_cost_matrix[i,j]) / _sum
+
+        return That
 
     def SRMSE(self,t_hat:np.array,actual_flows:np.array):
         """ Computes standardised root mean square error. See equation (22) of

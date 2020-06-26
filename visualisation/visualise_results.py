@@ -69,10 +69,10 @@ wd = get_project_root()
 
 # Import selected type of spatial interaction model
 if constrained == 'singly':
-    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
+    from models.singly_constrained.spatial_interaction_model import SpatialInteraction
 
-    # Instantiate SpatialIteraction
-    si = SpatialIteraction(dataset)
+    # Instantiate SpatialInteraction
+    si = SpatialInteraction(dataset)
 
     # Normalise data
     si.normalise_data()
@@ -81,10 +81,10 @@ if constrained == 'singly':
     origin_supply = si.normalised_origin_supply
 
 elif constrained == 'doubly':
-    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
+    from models.doubly_constrained.spatial_interaction_model import SpatialInteraction
 
-    # Instantiate SpatialIteraction
-    si = SpatialIteraction(dataset)
+    # Instantiate SpatialInteraction
+    si = SpatialInteraction(dataset)
 
     # Normalise data
     si.normalise_data()

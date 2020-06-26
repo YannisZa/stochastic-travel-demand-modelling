@@ -1,7 +1,6 @@
 """ Inferring flow for singly constrained origin-destination model using various methods. """
 
 import os
-import sys
 import ctypes
 import numpy as np
 import pandas as pd
@@ -9,10 +8,10 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from numpy.ctypeslib import ndpointer
+from scipy.optimize import minimize
 
-
-class SpatialIteraction():
-    """ Wrapper on C code of potential functions.
+class SpatialInteraction():
+    """ Object including flow (O/D) matrix inference routines of singly constrained SIM.
 
     Parameters
     ----------
@@ -89,34 +88,46 @@ class SpatialIteraction():
             Number of destination zones.
         """
 
+        # Import origin supply
+        originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
+        self.origin_supply = np.loadtxt(originsupply_file,ndmin=1)
+
+        # In case origin supply is not a list
+        if not isinstance(self.origin_supply,(np.ndarray, np.generic)):
+            self.origin_supply = np.array([self.origin_supply])
+
+        # Import origin locations
+        originlocations_file = os.path.join(self.data_directory,'origin_locations.txt')
+        self.origin_locations = np.loadtxt(originlocations_file,ndmin=1)
+
+        # Import destination locations
+        destinationlocations_file = os.path.join(self.data_directory,'destination_locations.txt')
+        self.destination_locations = np.loadtxt(destinationlocations_file,ndmin=1)
+
+        # Import initial and final destination sizes
+        initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
+        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file,ndmin=1)
+
+        # In case destination sizes are not a list
+        if not isinstance(self.initial_destination_sizes,(np.ndarray, np.generic)):
+            self.initial_destination_sizes = np.array([self.initial_destination_sizes])
+
+        # Import N,M
+        self.N = self.origin_supply.shape[0]
+        self.M = self.initial_destination_sizes.shape[0]
+
         # Import cost matrix
         costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
         self.cost_matrix = np.loadtxt(costmatrix_file)
 
-        # Import origin supply
-        originsupply_file = os.path.join(self.data_directory,'origin_supply.txt')
-        self.origin_supply = np.loadtxt(originsupply_file)
-
-        # Import origin locations
-        originlocations_file = os.path.join(self.data_directory,'origin_locations.txt')
-        self.origin_locations = np.loadtxt(originlocations_file)
-
-        # Import destination locations
-        destinationlocations_file = os.path.join(self.data_directory,'destination_locations.txt')
-        self.destination_locations = np.loadtxt(destinationlocations_file)
-
-        # Import initial and final destination sizes
-        initialdestinationsizes_file = os.path.join(self.data_directory,'initial_destination_sizes.txt')
-        self.initial_destination_sizes = np.loadtxt(initialdestinationsizes_file)
-        finaldestinationsizes_file = os.path.join(self.data_directory,'final_destination_sizes.txt')
-        self.final_destination_sizes = np.loadtxt(finaldestinationsizes_file)
-
-        # Import N,M
-        self.N, self.M = self.cost_matrix.shape
+        # Reshape cost matrix if necessary
+        if self.N == 1:
+            self.cost_matrix = np.reshape(self.cost_matrix[:,np.newaxis],(self.N,self.M))
+        if self.M == 1:
+            self.cost_matrix = np.reshape(self.cost_matrix[np.newaxis,:],(self.N,self.M))
 
         # Compute total initial and final destination sizes
         self.total_initial_sizes = np.sum(self.initial_destination_sizes)
-        self.total_final_sizes = np.sum(self.final_destination_sizes)
 
         # Compute total cost
         self.total_cost = 0
@@ -195,9 +206,6 @@ class SpatialIteraction():
 
         # Normalise initial destination sizes
         self.normalised_initial_destination_sizes = self.normalise(self.initial_destination_sizes,True)
-
-        # Normalise final destination sizes
-        self.normalised_final_destination_sizes = self.normalise(self.final_destination_sizes,True)
 
     def load_c_functions(self):
         """ Stores C functions that infer flows to global variables.
@@ -292,14 +300,72 @@ class SpatialIteraction():
           value = self.potential_deterministic(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return (value, grad)
 
+    def reconstruct_flow_matrix(self,xd,theta):
+        """ Reconstruct flow matrices
+
+        Parameters
+        ----------
+        xd : np.array
+            Log destination sizes.
+        theta : np.array
+            Fitted parameters.
+
+        Returns
+        -------
+        np.array
+            Estimated flow matrix.
+
+        """
+
+        # Estimated destination sizes
+        xhat = np.exp(minimize(self.potential_value, xd, method='L-BFGS-B', jac=True, args=(theta), options={'disp': False}).x)
+        # Estimated flows
+        That = np.zeros((self.N,self.M))
+        # Construct flow matrix
+        for i in range(self.N):
+            for j in range(self.M):
+                _sum = 0
+                # Compute denominator
+                for jj in range(self.M):
+                    _sum += np.exp(theta[0]*xhat[j]-theta[1]*self.normalised_cost_matrix[i,jj])
+                # Compute estimated flow
+                That[i,j] = self.normalised_origin_supply[i]*np.exp(theta[0]*xhat[j]-theta[1]*self.normalised_cost_matrix[i,j]) / _sum
+
+        return That
+
+    def SRMSE(self,t_hat:np.array,actual_flows:np.array):
+        """ Computes standardised root mean square error. See equation (22) of
+        "A primer for working with the Spatial Interaction modeling (SpInt) module
+        in the python spatial analysis library (PySAL)" for more details.
+
+        Parameters
+        ----------
+        t_hat : np.array [NxM]
+            Estimated flows.
+        actual_flows : np.array [NxM]
+            Actual flows.
+
+        Returns
+        -------
+        float
+            Standardised root mean square error of t_hat.
+
+        """
+        if actual_flows.shape[0] != t_hat.shape[0]:
+            raise ValueError(f'Actual flows have {actual_flows.shape[0]} rows whereas \hat{T} has {t_hat.shape[0]}.')
+        if actual_flows.shape[1] != t_hat.shape[1]:
+            raise ValueError(f'Actual flows have {actual_flows.shape[1]} columns whereas \hat{T} has {t_hat.shape[1]}.')
+
+        return ((np.sum((actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (np.sum(actual_flows) / (self.N*self.M))
+
     # Wrapper for hessian function
     def potential_hessian(self,xx,theta):
         A = np.zeros((self.M, self.M))
         wksp = np.zeros(self.M)
         if self.stochastic_mode:
-          value = self.hessian_stochastic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.hessian_stochastic(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         else:
-          value = self.hessian_deterministic(xx, A, self.origin_supply, self.cost_matrix, theta, self.N, self.M, wksp)
+          value = self.hessian_deterministic(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return A
 
     # Potential function of the likelihood

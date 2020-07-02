@@ -80,10 +80,13 @@ parser.add_argument("-pf", "--plot_flows",nargs='?',type=bool,default = False,
                     help="Flag for plotting resulting flows in model.")
 parser.add_argument("-sod", "--show_orig_dem",nargs='?',type=bool,default = False,
                     help="Flag for printing resulting origin supplies and destination demands in model.")
-
+parser.add_argument('-hide', '--hide', action='store_true')
 args = parser.parse_args()
+# Convert arguments to dictionary
+arguments = vars(args)
 # Print arguments
-print(json.dumps(vars(args), indent = 2))
+if not args.hide:
+    print(json.dumps(arguments, indent = 2))
 
 
 # Define dataset directory

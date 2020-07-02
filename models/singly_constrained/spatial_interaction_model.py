@@ -1,4 +1,6 @@
-""" Inferring flow for singly constrained origin-destination model using various methods. """
+"""
+Inferring flow for singly constrained origin-destination model using various methods.
+"""
 
 import os
 import ctypes
@@ -33,13 +35,11 @@ class SpatialInteraction():
 
     """
 
-    def __init__(self,dataset,stochastic_mode:bool=True):
+    def __init__(self,dataset):
         '''  Constructor '''
 
         # Define dataset
         self.dataset = dataset
-        # Define mode (stochastic or deterministic)
-        self.stochastic_mode = stochastic_mode
         # Define working directory
         self.working_directory = self.get_project_root()
         # Define data directory
@@ -212,23 +212,19 @@ class SpatialInteraction():
 
         Attributes
         -------
-        potential_deterministic [function]
-            Function used to compute the deterministic potential function.
-        potential_stochastic [function]
-            Function used to compute the stochastic potential function.
-        hessian_deterministic [function]
-            Function used to compute the Hessian of the deterministic potential function.
-        hessian_stochastic [function]
-            Function used to compute the Hessian of the stochastic potential function.
+        potential_and_jacobian [function]
+            Function used to compute the potential function and its Jacobian matrix.
+        potential_hessian [function]
+            Function used to compute the Hessian matrix of the potential function
         """
 
         # Load shared object
-        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/singly_constrained/potential_functions.so"))
+        lib = ctypes.cdll.LoadLibrary(os.path.join(self.working_directory,"models/singly_constrained/potential_function.so"))
 
-        # Load deterministic potential function from shared object
-        self.potential_deterministic = lib.potential_deterministic
-        self.potential_deterministic.restype = ctypes.c_double
-        self.potential_deterministic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+        # Load potential function and its jacobian from shared object
+        self.potential_and_jacobian = lib.potential_and_jacobian
+        self.potential_and_jacobian.restype = ctypes.c_double
+        self.potential_and_jacobian.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -237,34 +233,10 @@ class SpatialInteraction():
                         ctypes.c_size_t,
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
 
-        # Load stochastic potential function from shared object
-        self.potential_stochastic = lib.potential_stochastic
-        self.potential_stochastic.restype = ctypes.c_double
-        self.potential_stochastic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ctypes.c_size_t,
-                        ctypes.c_size_t,
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
-
-        # Load deterministic hessian function from shared object
-        self.hessian_deterministic = lib.hessian_deterministic
-        self.hessian_deterministic.restype = None
-        self.hessian_deterministic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
-                        ctypes.c_size_t,
-                        ctypes.c_size_t,
-                        ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
-
-        # Load stochastic hessian function from shared object
-        self.hessian_stochastic = lib.hessian_stochastic
-        self.hessian_stochastic.restype = None
-        self.hessian_stochastic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+        # Load hessian of potential function from shared object
+        self.potential_hessian = lib.hessian
+        self.potential_hessian.restype = None
+        self.potential_hessian.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -294,11 +266,38 @@ class SpatialInteraction():
         grad = np.zeros(self.M)
         wksp = np.zeros(self.M)
         # print('alpha =',theta[0],'beta =',theta[1],'delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
-        if self.stochastic_mode:
-          value = self.potential_stochastic(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
-        else:
-          value = self.potential_deterministic(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
+        value = self.potential_and_jacobian(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return (value, grad)
+
+    # Wrapper for hessian function
+    def potential_hessian(self,xx,theta):
+        A = np.zeros((self.M, self.M))
+        wksp = np.zeros(self.M)
+
+        value = self.potential_hessian(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
+        return A
+
+    # Potential function of the likelihood
+    def likelihood_value(self,xx,s2_inv:float=100.):
+        diff = xx - self.normalised_initial_destination_sizes
+        grad = s2_inv*diff
+        potential = 0.5*s2_inv*np.dot(diff, diff)
+        return pot, grad
+
+    # Potential function for aNealed importance sampling (no flows model)
+    def potential_value_annealed_importance_sampling(self,xx,theta):
+        delta = theta[2]
+        gamma = theta[3]
+        kappa = theta[4]
+
+        gaM_kk_exp_xx = gamma*kappa*np.exp(xx)
+
+        gradV = -gamma*(delta+1./self.M)*np.ones(self.M) + gaM_kk_exp_xx
+
+        V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
+
+        return V, gradV
+
 
     def reconstruct_flow_matrix(self,xd,theta):
         """ Reconstruct flow matrices
@@ -333,6 +332,7 @@ class SpatialInteraction():
 
         return That
 
+
     def SRMSE(self,t_hat:np.array,actual_flows:np.array):
         """ Computes standardised root mean square error. See equation (22) of
         "A primer for working with the Spatial Interaction modeling (SpInt) module
@@ -357,30 +357,3 @@ class SpatialInteraction():
             raise ValueError(f'Actual flows have {actual_flows.shape[1]} columns whereas \hat{T} has {t_hat.shape[1]}.')
 
         return ((np.sum((actual_flows - t_hat)**2) / (self.N*self.M))**.5) / (np.sum(actual_flows) / (self.N*self.M))
-
-    # Wrapper for hessian function
-    def potential_hessian(self,xx,theta):
-        A = np.zeros((self.M, self.M))
-        wksp = np.zeros(self.M)
-        if self.stochastic_mode:
-          value = self.hessian_stochastic(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
-        else:
-          value = self.hessian_deterministic(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
-        return A
-
-    # Potential function of the likelihood
-    def likelihood_value(self,xx,s2_inv:float=100.):
-        diff = xx - self.initial_log_sizes
-        grad = s2_inv*diff
-        potential = 0.5*s2_inv*np.dot(diff, diff)
-        return pot, grad
-
-    # Potential function for aNealed importance sampling (no flows model)
-    def potential_value_annealed_importance_sampling(self,xx,theta):
-        delta = theta[2]
-        gaM = theta[3]
-        kk = theta[4]
-        gaM_kk_exp_xx = gaM*kk*np.exp(xx)
-        gradV = -gaM*(delta+1./self.M)*np.ones(self.M) + gaM_kk_exp_xx
-        V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
-        return V, gradV

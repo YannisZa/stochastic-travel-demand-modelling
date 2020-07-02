@@ -1,0 +1,4 @@
+synthetic
+retail
+commuter_borough
+commuter_ward

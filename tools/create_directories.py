@@ -47,7 +47,7 @@ def create_directory(dir:str):
 
 # List of all available datasets and methods
 datasets = ['commuter_borough','commuter_ward','retail','transport','synthetic']
-methods = ['actual','dsf','newton_raphson','poisson_regression','ipf','inverse_problem','r_squared']
+methods = ['actual','dsf','newton_raphson','poisson_regression','ipf','inverse_problem','r_squared','laplace','potential']
 
 # Get project's root directory
 wd = get_root_working_directory()

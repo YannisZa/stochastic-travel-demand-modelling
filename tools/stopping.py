@@ -1,13 +1,57 @@
 """
 To generate random stopping times from P(K > k) = 1./k^1.1
 """
-
+import os
+import sys
+import json
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
-nums = np.empty(20000)
+# Fix random seed
+np.random.seed(889)
 
-for i in range(20000):
+# Get current working directory and project root directory
+def get_project_root():
+    """ Returns project's root working directory (entire path).
+
+    Returns
+    -------
+    string
+        Path to project's root directory.
+
+    """
+    # Get current working directory
+    cwd = os.getcwd()
+    # Remove all children directories
+    rd = os.path.join(cwd.split('stochastic-travel-demand-modelling/', 1)[0])
+    # Make sure directory ends with project's name
+    if not rd.endswith('stochastic-travel-demand-modelling'):
+        rd = os.path.join(rd,'stochastic-travel-demand-modelling/')
+
+    return rd
+
+# Get project directory
+wd = get_project_root()
+
+# Append project root directory to path
+sys.path.append(wd)
+
+# Parse arguments from command line
+parser = argparse.ArgumentParser(description='Script to create stopping times for approximating the inverse of z(\theta) by truncating an infinite series')
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
+                    help="Name of dataset (this is the directory name in data/input)")
+parser.add_argument("-n", "--n",nargs='?',type=int,default = 20000,
+                    help="Number of stopping times to create.")
+args = parser.parse_args()
+
+# Get dataset name
+dataset = args.dataset_name
+# Get number of stopping times
+nums = np.empty(args.n)
+
+for i in range(args.n):
     N = 1
     k_pow = 1.1
     u = np.random.uniform(0, 1)
@@ -15,4 +59,5 @@ for i in range(20000):
         N += 1
     nums[i] = N
 
-np.savetxt("stopping.txt", nums)
+np.savetxt(os.path.join(wd,f"data/input/{dataset}/stopping_times.txt"), nums)
+print('Done. Stopping times saved to',os.path.join(wd,f"data/input/{dataset}/stopping_times.txt"))

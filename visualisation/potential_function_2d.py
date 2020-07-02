@@ -59,9 +59,13 @@ parser.add_argument("-gmax", "--grid_max",nargs='?',type=float,default = .2,
                     help="Largest log destination W_j (x_j) to evaluate potential value.")
 parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
                     help="Number of points (n^2) to evaluate potential function")
+parser.add_argument('-hide', '--hide', action='store_true')
 args = parser.parse_args()
+# Convert arguments to dictionary
+arguments = vars(args)
 # Print arguments
-print(json.dumps(vars(args), indent = 2))
+if not args.hide:
+    print(json.dumps(arguments, indent = 2))
 
 # Define dataset directory
 dataset = args.dataset_name
@@ -142,14 +146,14 @@ plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gam
 # plt.tight_layout()
 
 # Save figure to output
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function.png'))
 
 # Show figure if instructed
 if args.show_figure:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function_parameters.json'), 'w') as outfile:
-    json.dump(vars(args), outfile)
+with open(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function_parameters.json'), 'w') as outfile:
+    json.dump(arguments, outfile)
 
-print('Figure saved to {}'.format(os.path.join(wd,f'data/output/{dataset}/inverse_problem/figures/{constrained}_2d_potential_function.png')))
+print('Figure saved to {}'.format(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function.png')))

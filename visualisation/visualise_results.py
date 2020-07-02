@@ -38,9 +38,9 @@ sys.path.append(get_project_root())
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Visualisation of inverse problem results. See result argument below for more info.')
-parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
+parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
                     help="Name of dataset (this is the directory name in data/input)")
-parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
+parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-r", "--result",nargs='?',type=str,choices=['low_noise','high_noise','hmc','opt'],default='hmc',
                     help="Type of result to visualise. \
@@ -49,13 +49,15 @@ parser.add_argument("-r", "--result",nargs='?',type=str,choices=['low_noise','hi
                         hmc: Statistics from HMC \
                         opt: Optimal statistics \
                         ")
-parser.add_argument("-lf", "--latent_factor",nargs='?',type=int,default=1000,
+parser.add_argument("-lf", "--latent_factor",nargs='?',type=int,default=100,
                     help="Factor used to scale latent destination sizes for visualisation.")
-parser.add_argument("-af", "--actual_factor",nargs='?',type=int,default=100,
+parser.add_argument("-af", "--actual_factor",nargs='?',type=int,default=1000,
                     help="Factor used to scale actual destination demand or origin supply for visualisation.")
+parser.add_argument('-hide', '--hide', action='store_true')
 args = parser.parse_args()
 # Print arguments
-print(json.dumps(vars(args), indent = 2))
+if not args.hide:
+    print(json.dumps(vars(args), indent = 2))
 
 # Define dataset directory
 dataset = args.dataset_name
@@ -112,12 +114,11 @@ latent_factor= args.latent_factor
 j = 0
 
 plt.figure(j)
-plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r',s=latent_factor*np.exp(xd),label='Actual dest sizes')
 if constrained == 'doubly':
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
+    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='b',edgecolors='b',s=latent_factor*destination_demand, alpha=0.5,label='Dest demands')
 else:
-    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
-
+    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='b',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r',edgecolors='r',s=actual_factor*np.exp(xd),label='Actual dest sizes')
 plt.legend()
 
 if args.result == 'low_noise':
@@ -198,31 +199,35 @@ elif args.result == 'high_noise':
     plt.show()
 
 elif args.result == 'hmc':
-    print('I am here...')
     # HMC plots
-    for alpha in tqdm([2.0]):#0.5,1.0,1.5,2.0]):
+    for alpha in tqdm([0.5,1.0,1.5,2.0]):
         samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(alpha)}.txt"))
         xx = samples[-1]
         j += 1
 
         plt.figure(j)
         plt.title("HMC alpha =" + str(alpha))
-        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
         if constrained == 'doubly':
             plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
         else:
             plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
         plt.legend()
+
+        plt.savefig(os.path.join(wd,f"data/output/{dataset}/inverse_problem/figures/{constrained}_hmc_samples_{str(alpha)}.png"))
         print('alpha=',str(alpha),'ended...')
 
-elif args.result == 'optimal':
+
+elif args.result == 'opt':
     # Opt plots
-    for alpha in [0.5, 1.0, 1.5, 2.0]:
-        xx = np.loadtxt("output/opt" + str(alpha) + ".txt")
+    for alpha in tqdm([0.5, 1.0, 1.5, 2.0]):
+        xx = np.loadtxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_optimal_latent_posterior_{str(alpha)}.txt'))
         j += 1
         plt.figure(j)
-        plt.title("Opt alpha=" + str(alpha))
-        plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=100*eP, alpha=0.5)
-        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r', s=1000*np.exp(xx))
+        plt.title("Optimal latent posterior alpha =" + str(alpha))
+        plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=latent_factor*origin_supply, alpha=0.5)
+        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r', s=actual_factor*np.exp(xx))
+        plt.savefig(os.path.join(wd,f"data/output/{dataset}/laplace/figures/{constrained}_optimal_latent_posterior_{str(alpha)}.png"))
+        print('alpha=',str(alpha),'ended...')
 
 plt.show()

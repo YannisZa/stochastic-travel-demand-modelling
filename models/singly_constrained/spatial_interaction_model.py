@@ -35,7 +35,7 @@ class SpatialInteraction():
 
     """
 
-    def __init__(self,dataset):
+    def __init__(self,dataset,cost_matrix_type=''):
         '''  Constructor '''
 
         # Define dataset
@@ -44,6 +44,10 @@ class SpatialInteraction():
         self.working_directory = self.get_project_root()
         # Define data directory
         self.data_directory = os.path.join(self.working_directory,'data/input/{}'.format(dataset))
+        # Store cost matrix file extenstion
+        self.cost_matrix_file_extension = ''
+        if cost_matrix_type == 'sn':
+            self.cost_matrix_file_extension = '_small_network'
         # Import data
         self.import_data()
         # Load C functions
@@ -82,6 +86,9 @@ class SpatialInteraction():
             Initial condition log sizes for ODE.
         origin supply [Nx1 array]
             Total supply for each destination.
+        cost_matrix_type : string
+            Type of cost matrix used ('' stands for Euclidean distance based
+            'small_network' stands for small transportation network including only A and B roads)
         N [int]
             Number of origin zones.
         M [int]
@@ -117,7 +124,7 @@ class SpatialInteraction():
         self.M = self.initial_destination_sizes.shape[0]
 
         # Import cost matrix
-        costmatrix_file = os.path.join(self.data_directory,'cost_matrix.txt')
+        costmatrix_file = os.path.join(self.data_directory,f'cost_matrix{self.cost_matrix_file_extension}.txt')
         self.cost_matrix = np.loadtxt(costmatrix_file)
 
         # Reshape cost matrix if necessary
@@ -234,9 +241,9 @@ class SpatialInteraction():
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
 
         # Load hessian of potential function from shared object
-        self.potential_hessian = lib.hessian
-        self.potential_hessian.restype = None
-        self.potential_hessian.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+        self.hessian = lib.hessian
+        self.hessian.restype = None
+        self.hessian.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -274,7 +281,7 @@ class SpatialInteraction():
         A = np.zeros((self.M, self.M))
         wksp = np.zeros(self.M)
 
-        value = self.potential_hessian(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
+        value = self.hessian(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return A
 
     # Potential function of the likelihood

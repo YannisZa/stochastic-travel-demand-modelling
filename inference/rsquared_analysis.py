@@ -40,6 +40,10 @@ sys.path.append(get_project_root())
 parser = argparse.ArgumentParser(description='R^2 analysis to find fitted parameters based on potential function minima.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
                     help="Name of dataset (this is the directory name in data/input)")
+parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','sn'],default='',
+                    help="Type of cost matrix used.\
+                        '': Euclidean distance based. \
+                        'sn': Transportation network cost based on A and B roads only. ")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-amin", "--amin",nargs='?',type=float,default = 0.0,
@@ -92,7 +96,9 @@ else:
     raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
 
 # Instantiate SpatialInteraction model
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
+
+sys.exit()
 
 # Compute kappa
 kappa = 1 + args.delta*si.M
@@ -183,7 +189,7 @@ print("R^2 and potential value:")
 print(r2_values[idx],potentials[idx])
 
 # Save R^2 to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_analysis.txt"), r2_values)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.txt"), r2_values)
 
 # Save fitted values to parameters
 arguments['fitted_alpha'] = XX[idx]
@@ -194,7 +200,7 @@ arguments['R^2'] = r2_values[idx]
 arguments['potential'] = potentials[idx]
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 print('Constructing flow matrix based on fitted parameters')
@@ -205,7 +211,7 @@ theta[1] = YY[idx]
 estimated_flows = si.reconstruct_flow_matrix(w_predictions[idx],theta)
 
 # Save estimated flows
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_estimated_flows.txt"), estimated_flows)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_estimated_flows{si.cost_matrix_file_extension}.txt"), estimated_flows)
 
 print('Rendering 2D plot of R^2 variation')
 
@@ -226,7 +232,7 @@ plt.ylabel("Parameter beta")
 plt.xlabel("Parameter alpha")
 
 # Save R2 figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.png'))
 
 # Set negative R^2 values to 0
 positive_r2_values = copy.deepcopy(r2_values)
@@ -250,6 +256,6 @@ ax.set_zlabel("R^2")
 ax.set_title('R^2 variation across parameter space')
 
 # Save figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis_3d.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis_3d{si.cost_matrix_file_extension}.png'))
 
 print('Done!')

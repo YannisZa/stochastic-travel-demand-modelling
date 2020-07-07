@@ -35,9 +35,11 @@ sys.path.append(get_project_root())
 parser = argparse.ArgumentParser(description='Plot potential function for given choice of parameters.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'commuter_borough',
                     help="Name of dataset (this is the directory name in data/input)")
-parser.add_argument("-m", "--mode",nargs='?',type=str,default = 'stochastic',
-                    help="Mode of evaluation (stochastic/determinstic)")
-parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='doubly',
+parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','sn'],default='',
+                    help="Type of cost matrix used.\
+                        '': Euclidean distance based. \
+                        'sn': Transportation network cost based on A and B roads only. ")
+parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-as", "--alphas",nargs='?',type=list,default = [.5, 1., 1.5, 2.],
                     help="List of alpha parameters")
@@ -69,25 +71,29 @@ if not args.hide:
 
 # Define dataset directory
 dataset = args.dataset_name
-# Define mode (stochastic/determinstic)
-mode = args.mode
+
 # Define type of spatial interaction model
 constrained = args.constrained
 
-# Import selected type of spatial interaction model
-if constrained == 'singly':
-    from models.singly_constrained.spatial_interaction_model import SpatialIteraction
-    # Instantiate SpatialIteraction
-    si = SpatialIteraction(dataset,mode)
-elif constrained == 'doubly':
-    from models.doubly_constrained.spatial_interaction_model import SpatialIteraction
-    # Instantiate SpatialIteraction
-    si = SpatialIteraction(dataset)
+# Define mode (stochastic/determinstic) based on delta value
+if args.delta == 0:
+    mode = 'deterministic'
 else:
-    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
+    mode = 'stochastic'
 
 # Get project directory
 wd = get_project_root()
+
+# Import selected type of spatial interaction model
+if constrained == 'singly':
+    from models.singly_constrained.spatial_interaction_model import SpatialInteraction
+elif constrained == 'doubly':
+    from models.doubly_constrained.spatial_interaction_model import SpatialInteraction
+else:
+    raise ValueError("{} spatial interaction model not implemented.".format(args.constrained))
+
+# Instantiate SpatialIteraction
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise necessary data for learning
 si.normalise_data()
@@ -146,14 +152,14 @@ plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gam
 # plt.tight_layout()
 
 # Save figure to output
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_{mode}_2d_potential_function{si.cost_matrix_file_extension}.png'))
 
 # Show figure if instructed
 if args.show_figure:
     plt.show()
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_{mode}_2d_potential_function{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
-print('Figure saved to {}'.format(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_2d_potential_function.png')))
+print('Figure saved to {}'.format(os.path.join(wd,f'data/output/{dataset}/potential/figures/{constrained}_{mode}_2d_potential_function{si.cost_matrix_file_extension}.png')))

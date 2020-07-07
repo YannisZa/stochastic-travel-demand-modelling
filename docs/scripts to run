@@ -1,11 +1,13 @@
 
 # Potential analysis
 
+python visualisation/potential_function_2d.py -data synthetic -d 0.00617494255748621 -b 10000 -g 20
+
 
 # R Squared analysis
 
-python inference/rsquared_analysis.py -data synthetic -d 0 -amax 2 -bmax 1400000 -n 100
-# python inference/rsquared_analysis.py -data synthetic -d 0.2857142857142857 -amax 4 -bmax 1400000 -n 100
+python inference/rsquared_analysis.py -data synthetic -d 0 -bmax 1400000 -n 100
+# python inference/rsquared_analysis.py -data synthetic -d 0.00617494255748621 -bmax 1400000 -n 100
 
 python inference/rsquared_analysis.py -data retail -d 0 -bmax 1400000 -n 1000
 python inference/rsquared_analysis.py -data retail -d 0.006122448979591836 -bmax 1400000 -n 1000
@@ -27,6 +29,9 @@ python inference/laplace_analysis.py -data synthetic -d 0.2727272727272727 -bmax
 
 python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -bmax 1400000 -g 10000 # or bmax 71260
 python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -bmax 1400000 -g 100 # or bmax 71260
+
+python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 10000 # or bmax 71260
+python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 100 # or bmax 71260
 
 python inference/laplace_analysis.py -data commuter_borough -d 0.01178781925343811 -bmax 1400000 -g 10000 # or bmax 71260
 python inference/laplace_analysis.py -data commuter_borough -d 0.01178781925343811 -bmax 1400000 -g 100 # or bmax 71260

@@ -47,6 +47,10 @@ parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commu
                     help="Name of dataset (this is the directory name in data/input)")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
+parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','sn'],default='',
+                    help="Type of cost matrix used.\
+                        '': Euclidean distance based. \
+                        'sn': Transportation network cost based on A and B roads only. ")
 parser.add_argument("-amin", "--amin",nargs='?',type=float,default = 0.0,
                     help="Minimum alpha parameter for grid search.")
 parser.add_argument("-amax", "--amax",nargs='?',type=float,default =  2.0,
@@ -67,8 +71,10 @@ parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
                     help="Flag for showing resulting figure.")
 parser.add_argument('-hide', '--hide', action='store_true')
 args = parser.parse_args()
+
 # Convert arguments to dictionary
 arguments = vars(args)
+
 # Print arguments
 if not args.hide:
     print(json.dumps(arguments, indent = 2))
@@ -91,7 +97,7 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialInteraction
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise data
 si.normalise_data()

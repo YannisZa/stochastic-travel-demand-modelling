@@ -284,12 +284,16 @@ class SpatialInteraction():
         value = self.hessian(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return A
 
-    # Potential function of the likelihood
+    # Log of potential function of the likelihood =  log(\pi(y|x))
     def likelihood_value(self,xx,s2_inv:float=100.):
+        # Compute difference
         diff = xx - self.normalised_initial_destination_sizes
+        # Compute gradient of log likelihood
         grad = s2_inv*diff
+        # Compute log likelihood (without constant factor)
         potential = 0.5*s2_inv*np.dot(diff, diff)
-        return pot, grad
+
+        return potential, grad
 
     # Potential function for aNealed importance sampling (no flows model)
     def potential_value_annealed_importance_sampling(self,xx,theta):

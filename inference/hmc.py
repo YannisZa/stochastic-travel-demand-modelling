@@ -63,7 +63,7 @@ arguments = vars(args)
 # Print arguments
 if not args.hide:
     print(json.dumps(arguments, indent = 2))
-    
+
 # Define dataset directory
 dataset = args.dataset_name
 
@@ -176,7 +176,7 @@ for i in tqdm(range(mcmc_n)):
 
             # Make a full step for the position
             x_p = x_p + epsilon*p_p
-            # Update potential value and its gradient
+            # Update log potential value and its gradient
             V_p, gradV_p = si.potential_value(x_p,theta)
 
             # print('l =',l)

@@ -12,3 +12,4 @@ shapely
 pysal
 seaborn
 networkx
+plotly

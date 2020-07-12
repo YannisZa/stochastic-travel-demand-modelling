@@ -36,7 +36,7 @@ def get_project_root():
 sys.path.append(get_project_root())
 
 
-# Parse arguments from cosi.Mand line
+# Parse arguments from command line
 parser = argparse.ArgumentParser(description='Low noise MCMC scheme to sequentially update  parameters and latent posteriors of the spatial interaction model.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
                     help="Name of dataset (this is the directory name in data/input)")
@@ -65,8 +65,10 @@ parser.add_argument('-hide', '--hide', action='store_true',
 parser.add_argument('-p', '--print', action='store_true',
                     help="If true allow print statements in this script.")
 args = parser.parse_args()
+
 # Convert arguments to dictionary
 arguments = vars(args)
+
 # Print arguments
 if not args.hide:
     print(json.dumps(arguments, indent = 2))
@@ -95,7 +97,7 @@ si = SpatialInteraction(dataset)
 si.normalise_data()
 
 # Fix random seed
-np.random.seed(888)
+np.random.seed(None)
 
 # Set theta for low-noise model's potential value parameters
 theta = [0 for i in range(6)]
@@ -301,7 +303,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
     x_p = xx
     # Momentum initialisation
     p_p = p
-    # Initial log potential energy
+    # Initial log potential energy and its gradient weighted by the likelihood function \pi(y|x)
     W_p, gradW_p = W, gradW
     # Leapfrog integrator
     for j in range(L):

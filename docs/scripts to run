@@ -15,26 +15,20 @@ python inference/rsquared_analysis.py -data retail -d 0.006122448979591836 -bmax
 python inference/rsquared_analysis.py -data commuter_ward -d 0 -bmax 1400000 -n 1000
 python inference/rsquared_analysis.py -data commuter_ward -d 0.01178781925343811 -bmax 1400000 -n 1000
 
-python inference/rsquared_analysis.py -data commuter_borough -d 0 -bmax 1400000 -n 1000
-python inference/rsquared_analysis.py -data commuter_borough -d 0.01178781925343811 -bmax 1400000 -n 1000
-
 
 # Laplace grid
-
-python inference/laplace_analysis.py -data retail -d 0.006122448979591836 -bmax 1400000 -g 100
-python inference/laplace_analysis.py -data retail -d 0.006122448979591836 -bmax 1400000 -g 10000
 
 python inference/laplace_analysis.py -data synthetic -d 0.47619047619047616 -bmax 12 -g 100
 python inference/laplace_analysis.py -data synthetic -d 0.47619047619047616 -bmax 12 -g 10000
 
+python inference/laplace_analysis.py -data retail -d 0.006122448979591836 -bmax 1400000 -g 100
+python inference/laplace_analysis.py -data retail -d 0.006122448979591836 -bmax 1400000 -g 10000
+
 python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -bmax 1400000 -g 100 # or bmax 71260
 python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -bmax 1400000 -g 10000 # or bmax 71260
 
-python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 10000 # or bmax 71260
-python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 100 # or bmax 71260
-
-python inference/laplace_analysis.py -data commuter_borough -d 0.01178781925343811 -bmax 1400000 -g 10000 # or bmax 71260
-python inference/laplace_analysis.py -data commuter_borough -d 0.01178781925343811 -bmax 1400000 -g 100 # or bmax 71260
+# python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 10000 # or bmax 71260
+# python inference/laplace_analysis.py -data commuter_ward -d 0.01178781925343811 -cm sn -bmax 1400000 -g 100 # or bmax 71260
 
 # Optimise latent posterior
 
@@ -48,12 +42,9 @@ python inference/optimise_latent_posterior.py -data commuter_ward -d 0.011787819
 python inference/optimise_latent_posterior.py -data commuter_ward -d 0.01178781925343811 -a 1.5 -b 210000 -g 10000
 python inference/optimise_latent_posterior.py -data commuter_ward -d 0.01178781925343811 -a 2.0 -b 210000 -g 10000
 
-python inference/optimise_latent_posterior.py -data commuter_borough -d 0.01178781925343811 -a 0.5 -b 210000 -g 10000
-python inference/optimise_latent_posterior.py -data commuter_borough -d 0.01178781925343811 -a 1.0 -b 210000 -g 10000
-python inference/optimise_latent_posterior.py -data commuter_borough -d 0.01178781925343811 -a 1.5 -b 210000 -g 10000
-python inference/optimise_latent_posterior.py -data commuter_borough -d 0.01178781925343811 -a 2.0 -b 210000 -g 10000
 
 # HMC sampling
+
 
 
 
@@ -68,9 +59,24 @@ python inference/mcmc_low_noise.py -data retail -d 0.006122448979591836
 
 python inference/mcmc_low_noise.py -data commuter_ward -d 0.01178781925343811 -t 0.1 # theta: 24% x: >90%
 python inference/mcmc_low_noise.py -data commuter_ward -d 0.01178781925343811 -t 0.05 # theta: 37-38% x: 96%
-python inference/mcmc_low_noise.py -data commuter_ward -d 0.01178781925343811 -t 0.04 -l # theta: % x: % 
+python inference/mcmc_low_noise.py -data commuter_ward -d 0.01178781925343811 -t 0.04 -l # theta: 43-46% x: 96% 
 python inference/mcmc_low_noise.py -data commuter_ward -d 0.01178781925343811 -t 0.2 -l # theta: 37-38% x: 96% Ap changed to half
 
 
 
 # High noise MCMC sampling
+
+python inference/mcmc_high_noise.py -data retail -d 0.006122448979591836
+
+python inference/mcmc_high_noise.py -data commuter_ward -d 0.01178781925343811
+
+
+
+
+
+
+
+
+
+
+

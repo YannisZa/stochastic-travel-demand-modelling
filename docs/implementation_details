@@ -1,0 +1,33 @@
+# Retail my script
+
+Iter: 10
+Theta AR: 0.3
+X AR: 0.9
+Net positives: 81%
+
+Iter: 20
+Theta AR: 0.5
+X AR: 0.95
+Net positives: 81%
+
+Iter: 30
+Theta AR: 0.625
+X AR: 0.975
+Net positives: 81%
+
+...
+
+Iter: 130
+Theta AR: 0.6230769230769231
+X AR: 0.9615384615384616
+Net positives: 81%
+
+# Retail their script
+
+Iter: 
+Theta AR: 
+X AR: 
+
+
+
+# Commuter ward my script

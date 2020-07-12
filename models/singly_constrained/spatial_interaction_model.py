@@ -252,8 +252,9 @@ class SpatialInteraction():
                         ctypes.c_size_t,
                         ndpointer(ctypes.c_double, flags="C_CONTIGUOUS")]
 
+
     def potential_value(self,xx,theta):
-        """ Computes potential value of singly constrained model in both deterministic and stochastic settings.
+        """ Computes the potential function of singly constrained model
 
         Parameters
         ----------
@@ -276,16 +277,45 @@ class SpatialInteraction():
         value = self.potential_and_jacobian(xx, grad, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return (value, grad)
 
-    # Wrapper for hessian function
+
     def potential_hessian(self,xx,theta):
+        """ Computes Hessian matrix of potential function for the singly constrained model.
+
+        Parameters
+        ----------
+        xx : np.array
+            Log destination sizes
+        theta : np.array
+            List of parameters
+
+        Returns
+        -------
+        np.ndarray
+            Hessian matrix of potential function
+
+        """
         A = np.zeros((self.M, self.M))
         wksp = np.zeros(self.M)
 
         value = self.hessian(xx, A, self.normalised_origin_supply, self.normalised_cost_matrix, theta, self.N, self.M, wksp)
         return A
 
-    # Log of potential function of the likelihood =  log(\pi(y|x))
     def likelihood_value(self,xx,s2_inv:float=100.):
+        """ Log of potential function of the likelihood =  log(\pi(y|x)).
+
+        Parameters
+        ----------
+        xx : np.array
+            Log destination sizes
+        s2_inv : float
+            Inverse sigma^2 where sigma is the noise of the observation model.
+
+        Returns
+        -------
+        float,np.array
+            Likelihood value and its derivative
+
+        """
         # Compute difference
         diff = xx - self.normalised_initial_destination_sizes
         # Compute gradient of log likelihood
@@ -295,17 +325,38 @@ class SpatialInteraction():
 
         return potential, grad
 
-    # Potential function for aNealed importance sampling (no flows model)
     def potential_value_annealed_importance_sampling(self,xx,theta):
+        """ Potential function for annealed importance sampling (no flows model)
+        -gamma*V_{theta}'(x)
+        where V_{theta}'(x) is equal to the potential function in the limit of alpha -> 1, beta -> 0
+
+        Parameters
+        ----------
+        xx : np.array
+            Log destination sizes
+        theta : np.array
+            List of parameters
+
+        Returns
+        -------
+        float, np.array
+            AIS potential value and its gradient
+
+        """
         delta = theta[2]
         gamma = theta[3]
         kappa = theta[4]
 
-        gaM_kk_exp_xx = gamma*kappa*np.exp(xx)
+        # Note that lim_{beta->0, alpha->1} gamma*V_{theta}(x) = gamma*kappa*\sum_{j=1}^M \exp(x_j) - gamma*delta * \sum_{j=1}^M x_j
 
-        gradV = -gamma*(delta+1./self.M)*np.ones(self.M) + gaM_kk_exp_xx
+        # gamma*kappa*\exp(xx)
+        gamma_kk_exp_xx = gamma*kappa*np.exp(xx)
 
-        V = -gaM*(delta+1./self.M)*xx.sum() + gaM_kk_exp_xx.sum()
+        # Function proportional to the potential function in the limit of alpha -> 1, beta -> 0
+        V = -gamma*(delta+1./self.M)*xx.sum() + gamma_kk_exp_xx.sum()
+
+        # Gradient of function above
+        gradV = -gamma*(delta+1./self.M)*np.ones(self.M) + gamma_kk_exp_xx
 
         return V, gradV
 

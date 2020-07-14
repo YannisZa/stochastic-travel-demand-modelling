@@ -44,7 +44,7 @@ parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 1.2,
                     help="Alpha parameter in potential function.")
-parser.add_argument("-b", "--beta",nargs='?',type=float,default = 6.469646964696469,
+parser.add_argument("-b", "--beta",nargs='?',type=float,default = 1000,
                     help="Beta parameter in potential function.")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 100.,
                     help="Gamma parameter in potential function.")

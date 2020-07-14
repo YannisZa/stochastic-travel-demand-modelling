@@ -98,8 +98,6 @@ else:
 # Instantiate SpatialInteraction model
 si = SpatialInteraction(dataset,args.cost_matrix_type)
 
-sys.exit()
-
 # Compute kappa
 kappa = 1 + args.delta*si.M
 # Define gamma (the choice is irrelevant)

@@ -91,13 +91,13 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialInteraction
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise data
 si.normalise_data()
 
 # Fix random seed
-np.random.seed(None)
+# np.random.seed(888)
 
 # Set theta for low-noise model's potential value parameters
 theta = [0 for i in range(6)]
@@ -146,7 +146,7 @@ def z_inverse(params):
 
     # Return array
     ret = np.empty(2)
-    # Log z(\theta)
+    # Log z(\theta) without the constant (2\pi\gamma^{-1})^{M/2}
     ret[0] = si.potential_value(minimum,params)[0] +  half_log_det_A
     # Sign of log inverse of z(\theta)
     ret[1] = 1.
@@ -156,7 +156,10 @@ def z_inverse(params):
 # MCMC tuning parameters
 # Randomwalk covariance
 Ap = np.array([[ 0.00749674,  0.00182529], [ 0.00182529,  0.00709968]])
-# Ap = np.array([[ 0.00374837,  0.000912645], [ 0.000912645,  0.00374837]])
+# Ap = np.array([[1.43988468e-04, 3.50580000e-05],
+       # [3.50580000e-05, 1.43988468e-04]])
+# Ap = np.array([[0.00949674, 0.00018253],
+#        [0.00018253, 0.00149674]])
 # Number of leapfrog steps
 L = args.L
 # Leapfrog step size
@@ -236,6 +239,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
 
     # Theta-proposal (random walk with reflecting boundaries)
     tt_p = tt + theta_step*np.dot(Ap, np.random.normal(0, 1, 2))
+    # Relfect the boundaries if theta proposal falls outside of [0,2]^2
     for j in range(2):
         if tt_p[j] < 0.:
             tt_p[j] = -tt_p[j]
@@ -255,7 +259,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
             V_p, gradV_p = si.potential_value(xx,theta)
             # Compute log parameter posterior for choice of X and updated theta proposal
             pp_p = log_z_inverse_p - V_p
-            # Compute log parameter posterior for choice of X and initial theta proposal
+            # Compute log parameter posterior for choice of X and initial theta
             pp = log_z_inverse - V
 
             if args.print:
@@ -266,6 +270,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
             if np.log(np.random.uniform(0, 1)) < pp_p - pp:
                 if args.print:
                     print("Theta-Accept")
+                    print(tt_p)
                 # Update initial theta
                 tt = tt_p
                 # Update log potential function for choice of initial theta
@@ -363,15 +368,17 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
             np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"), samples3)
             print("Theta AR " + str(float(ac)/float(pc)))
             print("X AR " + str(float(ac2)/float(pc2)))
-            # print(f"Net positives {str(int(np.sum(samples3[:(i+1)])))} out of {str((i+1))} = {str( int( 100*np.sum(samples3[:(i+1)])/(i+1) ) )}%")
-            if dataset == 'synthetic' and float(ac)/float(pc) <= 0.7 and float(ac)/float(pc) >= 0.4:
-                print('Last accepted theta = ',tt)
-                theta_step *= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
-                print('New theta step = ',theta_step)
-            elif dataset == 'synthetic' and ((float(ac)/float(pc) > 0.7) or (float(ac)/float(pc) < 0.4)):
-                # print('Last accepted theta = ',tt)
-                theta_step /= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
-                print('New theta step = ',theta_step)
+
+            print("Last proposal " + str(tt_p) + " with " + str(ss_p))
+            print(str(pp_p) + " vs " + str(pp))
+            # if dataset == 'synthetic' and float(ac)/float(pc) <= 0.7 and float(ac)/float(pc) >= 0.4:
+            #     print('Last accepted theta = ',tt)
+            #     theta_step *= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
+            #     print('New theta step = ',theta_step)
+            # elif dataset == 'synthetic' and ((float(ac)/float(pc) > 0.7) or (float(ac)/float(pc) < 0.4)):
+            #     # print('Last accepted theta = ',tt)
+            #     theta_step /= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
+            #     print('New theta step = ',theta_step)
 
 if int(0.05*args.mcmc_n) == 0:
     print("Saving")
@@ -380,7 +387,7 @@ if int(0.05*args.mcmc_n) == 0:
     np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"), samples3)
     print("Theta AR " + str(float(ac)/float(pc)))
     print("X AR " + str(float(ac2)/float(pc2)))
-    # print(f"Net positives {str(np.sum(samples3))} out of {str(args.mcmc_n)} = {str(int(100 * np.sum(samples3) / args.mcmc_n))}%")
+
 
 print('Computing posterior summary statistics')
 
@@ -394,6 +401,9 @@ print(f'Theta = {theta_mean} +/- {theta_sd}')
 arguments['theta_mean'] = list(theta_mean)
 arguments['theta_sd'] = list(theta_sd)
 arguments['x_mean'] = list(x_mean)
+arguments['theta_initial'] = list(samples[mcmc_start])
+arguments['x_initial'] = list(samples[mcmc_start])
+
 
 print('Storing posterior samples')
 

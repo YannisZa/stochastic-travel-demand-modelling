@@ -10,8 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+from matplotlib import rc
 from scipy.optimize import minimize
-from tqdm import tqdm
+
 
 # Get current working directory and project root directory
 def get_project_root():
@@ -34,7 +35,8 @@ def get_project_root():
     return rd
 
 # Append project root directory to path
-sys.path.append(get_project_root())
+wd = get_project_root()
+sys.path.append(wd)
 
 # Parse arguments from command line
 parser = argparse.ArgumentParser(description='Visualisation of inverse problem results. See result argument below for more info.')
@@ -63,11 +65,6 @@ if not args.hide:
 dataset = args.dataset_name
 # Define type of spatial interaction model
 constrained = args.constrained
-
-
-# Get project directory
-wd = get_project_root()
-
 
 # Import selected type of spatial interaction model
 if constrained == 'singly':
@@ -110,33 +107,55 @@ actual_factor = args.actual_factor
 latent_factor= args.latent_factor
 
 
+# Plot settings
+plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
+# Options
+params = {'text.usetex' : True,
+          'font.size' : 20,
+          'legend.fontsize': 20,
+          'legend.handlelength': 2,
+          'font.family' : 'sans-serif',
+          'font.sans-serif':['Helvetica'],
+          'text.latex.unicode': True
+          }
+plt.rcParams.update(params)
+
 # Figure number
 j = 0
 
 plt.figure(j)
 if constrained == 'doubly':
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='b',edgecolors='b',s=latent_factor*destination_demand, alpha=0.5,label='Dest demands')
+    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='b',edgecolors='b',s=latent_factor*destination_demand, alpha=0.5,label='Dest demands')
 else:
-    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='b',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
-plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r',edgecolors='r',s=actual_factor*np.exp(xd),label='Actual dest sizes')
+    plt.scatter(origin_locs[:, 0], origin_locs[:, 1], color='b',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r',edgecolors='r',s=actual_factor*np.exp(xd),label='Actual dest sizes')
 plt.legend()
 
 if args.result == 'low_noise':
     # Low noise stats
-    samples = np.loadtxt("output/low_noise_samples.txt")
-    samples2 = np.loadtxt("output/low_noise_samples2.txt")
-    samples3 = np.loadtxt("output/low_noise_samples3.txt")
+    samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt"))
+    samples2 = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt"))
+    samples3 = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"))
+
+    # Import arguments
+    with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_low_noise_mcmc_samples_parameters.json')) as infile:
+        arguments = json.load(infile)
+
+
     j+=1
     plt.figure(j)
     plt.title("Alpha low noise")
     plt.plot(samples[:, 0])
-    plt.xlim([0, 20000])
+    plt.xlim([arguments['mcmc_start'], arguments['mcmc_n']])
+
     j+=1
     plt.figure(j)
     plt.title("Beta low noise")
     plt.plot(samples[:, 1])
-    plt.xlim([0, 20000])
+    plt.xlim([arguments['mcmc_start'], arguments['mcmc_n']])
+
     print("\nLow noise stats:")
+
     alpha_mean = np.dot(samples3, samples[:, 0])/np.sum(samples3)
     alpha_sd = np.sqrt(np.dot(samples3, samples[:, 0]**2)/np.sum(samples3) - alpha_mean**2)
     print("Alpha mean: " + str(alpha_mean))
@@ -145,6 +164,7 @@ if args.result == 'low_noise':
     beta_sd = np.sqrt(np.dot(samples3, samples[:, 1]**2)/np.sum(samples3) - beta_mean**2)
     print("Beta mean: " + str(beta_mean))
     print("Beta sd: " + str(beta_sd))
+
 
     x_e = (np.exp(samples2)*samples3[:, np.newaxis]).sum(axis=0)/np.sum(samples3)
     x2_e = (np.exp(2*samples2)*samples3[:, np.newaxis]).sum(axis=0)/np.sum(samples3)
@@ -155,25 +175,45 @@ if args.result == 'low_noise':
     j+=1
     plt.figure(j)
     plt.title("Low noise latents")
-    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=100*eP, alpha=0.5)
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], facecolors='none', edgecolors='r', s=1000*lower)
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], facecolors='none', edgecolors='r', s=1000*upper)
+    plt.scatter(origin_locs[:, 0], origin_locs[:, 1], s=100*si.normalised_origin_supply, alpha=0.5)
+    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], facecolors='none', edgecolors='r', s=1000*lower)
+    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], facecolors='none', edgecolors='r', s=1000*upper)
+
+    j+=1
+    plt.figure(j)
+    plt.title("Residual plot")
+    plt.scatter(x=np.log(mean),y=(si.normalised_initial_destination_sizes-np.log(mean)))
+    plt.xlim([np.min(np.log(mean)), np.max(np.log(mean))])
+
+    j+=1
+    plt.figure(j)
+    plt.title("Predictions plot")
+    plt.scatter(x=np.log(mean),y=si.normalised_initial_destination_sizes)
+    plt.xlim([np.min(np.log(mean)), np.max(np.log(mean))])
 
 elif args.result == 'high_noise':
     # High noise stats
-    samples = np.loadtxt("output/high_noise_samples.txt")
-    samples2 = np.loadtxt("output/high_noise_samples2.txt")
-    samples3 = np.loadtxt("output/high_noise_samples3.txt")
+    samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples.txt"))
+    samples2 = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt"))
+    samples3 = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"))
+
+    # Import arguments
+    with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json')) as infile:
+        arguments = json.load(infile)
+
+
     j+=1
     plt.figure(j)
     plt.title("Alpha high noise")
     plt.plot(samples[:, 0])
-    plt.xlim([0, 20000])
+    plt.xlim([arguments['mcmc_start'], arguments['mcmc_n']])
+
     j+=1
     plt.figure(j)
     plt.title("Beta high noise")
     plt.plot(samples[:, 1])
-    plt.xlim([0, 20000])
+    plt.xlim([arguments['mcmc_start'], arguments['mcmc_n']])
+
     print("\nHigh noise stats:")
     alpha_mean = np.dot(samples3, samples[:, 0])/np.sum(samples3)
     alpha_sd = np.sqrt(np.dot(samples3, samples[:, 0]**2)/np.sum(samples3) - alpha_mean**2)
@@ -190,28 +230,47 @@ elif args.result == 'high_noise':
     mean = x_e
     lower = mean-3.*sd
     upper = mean+3.*sd
+
     j+=1
     plt.figure(j)
-    plt.title("Low noise latents")
-    plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=100*eP, alpha=0.5)
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], facecolors='none', edgecolors='r', s=1000*lower)
-    plt.scatter(destination_locs[:, 1], destination_locs[:, 0], facecolors='none', edgecolors='r', s=1000*upper)
+    plt.title("High noise latents")
+    plt.scatter(origin_locs[:, 0], origin_locs[:, 1], s=100*si.normalised_origin_supply, alpha=0.5)
+    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], facecolors='none', edgecolors='r', s=1000*lower)
+    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], facecolors='none', edgecolors='r', s=1000*upper)
     plt.show()
+
+    j+=1
+    plt.figure(j)
+    plt.title("Residual plot")
+    plt.scatter(x=np.log(mean),y=(si.normalised_initial_destination_sizes-np.log(mean)))
+    plt.xlim([np.min(np.log(mean)), np.max(np.log(mean))])
+
+    j+=1
+    plt.figure(j)
+    plt.title("Predictions plot")
+    plt.scatter(x=np.log(mean),y=si.normalised_initial_destination_sizes)
+    plt.xlim([np.min(np.log(mean)), np.max(np.log(mean))])
 
 elif args.result == 'hmc':
     # HMC plots
     for alpha in tqdm([0.5,1.0,1.5,2.0]):
+        # Import latent posterior samples
         samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(alpha)}.txt"))
+
+        # Import arguments
+        with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json')) as infile:
+            arguments = json.load(infile)
+
         xx = samples[-1]
         j += 1
 
         plt.figure(j)
-        plt.title("HMC alpha =" + str(alpha))
+        plt.title(rf"Latent size posterior for $\alpha = {alpha}$")
         if constrained == 'doubly':
-            plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
+            plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
         else:
-            plt.scatter(origin_locs[:, 1], origin_locs[:, 0], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
-        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
+            plt.scatter(origin_locs[:, 0], origin_locs[:, 1], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+        plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
         plt.legend()
 
         plt.savefig(os.path.join(wd,f"data/output/{dataset}/inverse_problem/figures/{constrained}_hmc_samples_{str(alpha)}.png"))
@@ -224,9 +283,11 @@ elif args.result == 'opt':
         xx = np.loadtxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_optimal_latent_posterior_{str(alpha)}.txt'))
         j += 1
         plt.figure(j)
-        plt.title("Optimal latent posterior alpha =" + str(alpha))
-        plt.scatter(origin_locs[:, 1], origin_locs[:, 0], s=latent_factor*origin_supply, alpha=0.5)
-        plt.scatter(destination_locs[:, 1], destination_locs[:, 0], color='r', s=actual_factor*np.exp(xx))
+        plt.title(r"Optimal latent posterior for $\alpha$ =" + str(alpha))
+        plt.scatter(origin_locs[:, 0], origin_locs[:, 1], s=latent_factor*origin_supply, alpha=0.5)
+        plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r', s=actual_factor*np.exp(xx))
+        plt.xlabel('Longitude')
+        plt.ylabel('Latitude')
         plt.savefig(os.path.join(wd,f"data/output/{dataset}/laplace/figures/{constrained}_optimal_latent_posterior_{str(alpha)}.png"))
         print('alpha=',str(alpha),'ended...')
 

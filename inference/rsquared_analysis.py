@@ -10,6 +10,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+from matplotlib import rc
 from tqdm import tqdm
 from scipy.optimize import minimize
 
@@ -52,7 +53,7 @@ parser.add_argument("-amax", "--amax",nargs='?',type=float,default =  2.0,
                     help="Minimum alpha parameter for grid search.")
 parser.add_argument("-bmin", "--bmin",nargs='?',type=float,default = 0.0,
                     help="Minimum beta parameter for grid search.")
-parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 100,
+parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 400000,
                     help="Minimum beta parameter for grid search.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.3,
                     help="Delta parameter.")
@@ -60,9 +61,10 @@ parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
                     help="Epsilon parameter.")
 parser.add_argument("-n", "--grid_size",nargs='?',type=int,default = 100,
                     help="Number of points (n^2) to evaluate potential function.")
-parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
-                    help="Flag for showing resulting figure.")
-parser.add_argument('-hide', '--hide', action='store_true')
+parser.add_argument("-s", "--plot_results",action='store_true',
+                    help="Flag for plotting resulting figures and tables.")
+parser.add_argument('-hide', '--hide', action='store_true',
+                    help="Flag for hiding print functions.")
 args = parser.parse_args()
 
 # Convert arguments to dictionary
@@ -118,7 +120,6 @@ theta = np.array([alpha_values[0], beta_values[0], args.delta, gamma, kappa, arg
 # Normalise initial log destination sizes
 si.normalise_data()
 xd = si.normalised_initial_destination_sizes
-# xd = np.loadtxt("./cities_and_regions/data/london_n/xd0.txt")
 
 # Search values
 last_r2 = -np.infty
@@ -130,20 +131,7 @@ w_data = np.exp(xd)
 w_data_centred = w_data - np.mean(w_data)
 ss_tot = np.dot(w_data_centred, w_data_centred)
 
-
-# Compute destination sizes based on optimal theta
-# theta[0] = 1.36
-# theta[1] = 5
-# print('alpha =',theta[0],'beta =',theta[1],'delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
-# opt_w_pred = np.exp(minimize(si.potential_value, xd, method='L-BFGS-B', jac=True, args=(theta), options={'disp': False}).x)
-# opt_res = opt_w_pred - w_data
-# opt_ss_res = np.dot(opt_res, opt_res)
-#
-# print("Optimal params alpha, beta and scaled beta:")
-# print(theta[0],theta[1],theta[1]*args.amax/(args.bmax))
-# print("Optimal R^2",1. - opt_ss_res/ss_tot)
-# sys.exit()
-
+# Print parameters
 print('delta =',theta[2],'gamma =',theta[3],'kappa =',theta[4],'epsilon =',theta[5])
 # Perform grid evaluations
 for i in tqdm(range(grid_n)):
@@ -186,8 +174,9 @@ print(XX[idx], YY[idx],YY[idx]*args.amax/args.bmax)
 print("R^2 and potential value:")
 print(r2_values[idx],potentials[idx])
 
-# Save R^2 to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.txt"), r2_values)
+if not args.plot_results:
+    # Save R^2 to file
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.txt"), r2_values)
 
 # Save fitted values to parameters
 arguments['fitted_alpha'] = XX[idx]
@@ -198,8 +187,9 @@ arguments['R^2'] = r2_values[idx]
 arguments['potential'] = potentials[idx]
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
-    json.dump(arguments, outfile)
+if not rgs.plot_results:
+    with open(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
+        json.dump(arguments, outfile)
 
 print('Constructing flow matrix based on fitted parameters')
 
@@ -208,13 +198,24 @@ theta[0] = XX[idx]
 theta[1] = YY[idx]
 estimated_flows = si.reconstruct_flow_matrix(w_predictions[idx],theta)
 
-# Save estimated flows
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_estimated_flows{si.cost_matrix_file_extension}.txt"), estimated_flows)
+if not args.plot_results:
+    # Save estimated flows
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/r_squared/{constrained}_{mode}_rsquared_estimated_flows{si.cost_matrix_file_extension}.txt"), estimated_flows)
 
 print('Rendering 2D plot of R^2 variation')
 
 # Plot options
-plt.style.use('classic')
+plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
+# Options
+params = {'text.usetex' : True,
+          'font.size' : 20,
+          'legend.fontsize': 20,
+          'legend.handlelength': 2,
+          'font.family' : 'sans-serif',
+          'font.sans-serif':['Helvetica'],
+          'text.latex.unicode': True
+          }
+plt.rcParams.update(params)
 
 # Plot R^2
 fig = plt.figure(figsize=(8,8))
@@ -225,20 +226,21 @@ plt.xlim([np.min(XX), np.max(XX)])
 plt.ylim([np.min(YY)*args.amax/(args.bmax), np.max(YY)*args.amax/(args.bmax)])
 # plt.ylim([np.min(YY), np.max(YY)])
 r2_cbar = plt.colorbar()
-r2_cbar.set_label('R^2')
-plt.ylabel("Parameter beta")
-plt.xlabel("Parameter alpha")
-
-# Save R2 figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.png'))
+r2_cbar.set_label(r'$R^2$',rotation=90)
+plt.ylabel(r'$\beta$')
+plt.xlabel(r'$\alpha$')
 
 # Set negative R^2 values to 0
 positive_r2_values = copy.deepcopy(r2_values)
 positive_r2_values[positive_r2_values<0] = 0
 
 # Show figure if requested
-if args.show_figure:
+if args.plot_results:
     plt.show()
+else:
+    # Save R2 figure to file
+    plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}.png'))
+
 
 print('Rendering 3D plot of R^2 variation')
 
@@ -248,12 +250,17 @@ fig.tight_layout(pad=0.5)
 ax = plt.axes(projection='3d')
 ax.plot_surface(XX, YY*args.amax/(args.bmax), positive_r2_values, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none')
-ax.set_ylabel("beta")
-ax.set_xlabel("alpha")
-ax.set_zlabel("R^2")
-ax.set_title('R^2 variation across parameter space')
+ax.set_ylabel(r"$\beta$")
+ax.set_xlabel(r"$\alpha$")
+ax.set_zlabel(r"$R^2$")
+ax.set_title(r'$R^2$ variation across parameter space')
 
-# Save figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis_3d{si.cost_matrix_file_extension}.png'))
+
+# Show figure if requested
+if args.plot_results:
+    plt.show()
+else:
+    # Save figure to file
+    plt.savefig(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis_3d{si.cost_matrix_file_extension}.png'))
 
 print('Done!')

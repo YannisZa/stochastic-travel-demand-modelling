@@ -64,6 +64,8 @@ parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 0.02,
                     help="Leapfrog step size in HMC latent posterior update. This is NOT the potential value's epsilon parameter, which assumed to be 1.")
 parser.add_argument("-L", "--L",nargs='?',type=int,default = 50,
                     help="Number of leapfrog steps to be taken in HMC latent posterior update.")
+parser.add_argument("-b", "--b_max",nargs='?',type=float,default = 700000,
+                    help="Maximum value of beta (this is what the cost matrix normalises to).")
 parser.add_argument('-hide', '--hide', action='store_true',
                     help="If true hide print statement of parameters used to run this script.")
 parser.add_argument('-p', '--print', action='store_true',
@@ -95,7 +97,7 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialInteraction
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise data
 si.normalise_data()
@@ -119,6 +121,15 @@ theta = np.array(theta)
 # Load random stopping times
 stopping = np.loadtxt(os.path.join(wd,f"data/input/{dataset}/stopping_times.txt"))
 
+# Parameters for annealed importance sampling (AIS)
+# Number of samples (w^{(i)}'s) in AIS
+p_n = 10
+# Number of bridging distributions used to create w^{(i)}
+t_n = 50
+# HMC leapfrog steps
+L = 10
+# HMC leapfrog stepsize
+eps = 0.1
 
 # Annealed importance sampling - returns an importance sampling estimate of z(theta)
 # See Neal, R. M. (1998). Annealed Importance Sampling. Statistics and Computing, 11(2), 125–139. Retrieved from http://arxiv.org/abs/physics/9803008
@@ -127,16 +138,6 @@ def ais_ln_z(i):
 
     # Initialize AIS
     np.random.seed(None)
-
-    # Parameters for annealed importance sampling (AIS)
-    # Number of samples (w^{(i)}'s) in AIS
-    p_n = 10
-    # Number of bridging distributions used to create w^{(i)}
-    t_n = 50
-    # HMC leapfrog steps
-    L = 10
-    # HMC leapfrog stepsize
-    eps = 0.1
 
     # print('i =',i)
 
@@ -367,7 +368,7 @@ arguments['initial_x'] = list(xx)
 
 # Initialise alpha and beta parameters
 theta[0] = tt[0]
-theta[1] = tt[1]*0.7e6
+theta[1] = tt[1]*args.b_max
 # Compute initial unbiased estimate of 1/z(theta)
 lnzinv, ss = unbiased_z_inv(mcmc_start-1)
 
@@ -403,7 +404,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
     if tt_p.min() > 0 and tt_p.max() <= 2:
         # Update alpha and beta to new theta proposal
         theta[0] = tt_p[0]
-        theta[1] = tt_p[1]*0.7e6
+        theta[1] = tt_p[1]*args.b_max
         # Compute unbiased estimate of 1/z(theta) for theta proposal
         lnzinv_p, ss_p = unbiased_z_inv(i)
         # Compute potential value for theta proposal
@@ -439,7 +440,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
 
     # Reset theta for HMC
     theta[0] = tt[0]
-    theta[1] = tt[1]*0.7e6
+    theta[1] = tt[1]*args.b_max
 
 
     # Initialize leapfrog integrator for HMC proposal
@@ -515,17 +516,19 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
         np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt"), samples2)
         np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"), samples3)
 
-        arguments['last_iteration'] = i
+        arguments['last_iteration'] = str(i)
 
         # Save parameters to file
         with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json'), 'w') as outfile:
             json.dump(arguments, outfile)
 
+        print("Last proposal" + str(tt_p) + " with " + str(ss_p))
+        print(str(pp_p) + " vs " + str(pp))
+
         print('Iteration: ',str(int(i+1)))
         print("Theta AR: " + str(float(ac)/float(pc)))
         print("X AR: " + str(float(ac2)/float(pc2)))
         print(f"Net positives: {str( int( 100*np.sum(samples3[:(i+1)])/(i+1) ) )}%")
-        # print(f"Net positives {str(int(np.sum(samples3[:(i+1)])))} out of {str((i+1))} = {str( int( 100*np.sum(samples3[:(i+1)])/(i+1) ) )}%")
 
 print('Computing posterior summary statistics')
 
@@ -551,10 +554,10 @@ np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}
 np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"),samples3)
 
 # Store fixed parameters to arguments
-arguments['p_n'] = p_n
-arguments['t_n'] = t_n
-arguments['L'] = L
-arguments['eps'] = eps
+arguments['p_n_AIS'] = p_n
+arguments['t_n_AIS'] = t_n
+arguments['L_AIS'] = L
+arguments['eps_AIS'] = eps
 
 # Save parameters to file
 with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json'), 'w') as outfile:

@@ -52,7 +52,7 @@ parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.26666666666
                     help="Delta parameter in potential function.")
 parser.add_argument("-n", "--mcmc_n",nargs='?',type=int,default = 20000,
                     help="Number of MCMC iterations.")
-parser.add_argument("-s", "--mcmc_start",nargs='?',type=int,default = 1,
+parser.add_argument("-s", "--mcmc_start",nargs='?',type=int,default = 0,
                     help="MCMC iteration prior to which all iterations are diregarded.")
 parser.add_argument("-t", "--theta_step",nargs='?',type=float,default = 1.,
                     help="Step size used in Random Walk transition in the theta proposal.")
@@ -60,6 +60,8 @@ parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 0.02,
                     help="Leapfrog step size in HMC latent posterior update. This is NOT the potential value's epsilon parameter, which assumed to be 1.")
 parser.add_argument("-L", "--L",nargs='?',type=int,default = 50,
                     help="Number of leapfrog steps to be taken in HMC latent posterior update.")
+parser.add_argument("-b", "--b_max",nargs='?',type=float,default = 700000,
+                    help="Maximum value of beta (this is what the cost matrix normalises to).")
 parser.add_argument('-hide', '--hide', action='store_true',
                     help="If true hide print statement of parameters used to run this script.")
 parser.add_argument('-p', '--print', action='store_true',
@@ -156,10 +158,8 @@ def z_inverse(params):
 # MCMC tuning parameters
 # Randomwalk covariance
 Ap = np.array([[ 0.00749674,  0.00182529], [ 0.00182529,  0.00709968]])
-# Ap = np.array([[1.43988468e-04, 3.50580000e-05],
-       # [3.50580000e-05, 1.43988468e-04]])
-# Ap = np.array([[0.00949674, 0.00018253],
-#        [0.00018253, 0.00149674]])
+# Ap = np.array([[0.01025014, 0.00018253],[0.00018253, 0.01025014]])
+
 # Number of leapfrog steps
 L = args.L
 # Leapfrog step size
@@ -180,9 +180,9 @@ samples3 = np.empty(mcmc_n)
 # Decide whether to start new experiment or load old one
 if args.load_experiment:
 
-    theta_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt")
-    logsize_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt")
-    sign_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt")
+    theta_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}.txt")
+    logsize_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}.txt")
+    sign_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}.txt")
 
     if not os.path.exists(theta_path):
         raise Exception('No experiment has been run before. File does not exist in {}')
@@ -192,14 +192,14 @@ if args.load_experiment:
         raise Exception('No experiment has been run before. File does not exist in {}')
 
     # Load updated sample initialisations
-    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt"))
-    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt"))
-    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"))
+    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}.txt"))
+    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}.txt"))
+    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}.txt"))
 else:
     # Load initial sample initialisations
-    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples_initial.txt"))
-    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples_initial.txt"))
-    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples_initial.txt"))
+    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}_initial.txt"))
+    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}_initial.txt"))
+    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}_initial.txt"))
 
 # Load sample initialisations
 samples[:mcmc_start+1] = samples_init[:mcmc_start+1]
@@ -216,7 +216,7 @@ print('Initial theta = ',tt)
 xx = samples2[mcmc_start]
 # Initial theta
 theta[0] = tt[0]
-theta[1] = tt[1]*0.7e6
+theta[1] = tt[1]*args.b_max
 # Compute initial log inverse z(\theta)
 log_z_inverse, ss = z_inverse(theta)
 # Evaluate log potential function for initial choice of \theta
@@ -226,6 +226,11 @@ V, gradV = si.potential_value(xx,theta)
 # Theta acceptance rates
 ac = 0
 pc = 0
+# Count number of reflections for alpha and beta
+rca = 0
+rcb = 0
+# Number of times theta is outside the boundary
+bc = 0
 # X acceptance rates
 ac2 = 0
 pc2 = 0
@@ -242,8 +247,14 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
     # Relfect the boundaries if theta proposal falls outside of [0,2]^2
     for j in range(2):
         if tt_p[j] < 0.:
+            # Increment number of reflections
+            rca += 1
+            # Reflect off boundary
             tt_p[j] = -tt_p[j]
         elif tt_p[j] > 2.:
+            # Increment number of reflections
+            rcb += 1
+            # Reflect off boundary
             tt_p[j] = 2. - (tt_p[j] - 2.)
 
     # Theta-accept/reject
@@ -251,7 +262,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
         try:
             # Update theta proposal
             theta[0] = tt_p[0]
-            theta[1] = tt_p[1]*0.7e6
+            theta[1] = tt_p[1]*args.b_max
             # Compute inverse of z(theta)
             log_z_inverse_p, ss_p = z_inverse(theta)
 
@@ -285,13 +296,14 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
                     print("Theta-Reject")
         except Exception:
             raise Exception('ERROR FOUND')
-
+    else:
+        bc += 1
 
     ''' Log destination size (X) update '''
 
     # Reset theta for HMC
     theta[0] = tt[0]
-    theta[1] = tt[1]*0.7e6
+    theta[1] = tt[1]*args.b_max
 
 
     # Initialize leapfrog integrator for HMC proposal
@@ -363,28 +375,22 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
     if int(0.05*args.mcmc_n) > 0:
         if (i+1) % (int(0.05*args.mcmc_n)) == 0:
             print("Saving")
-            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt"), samples)
-            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt"), samples2)
-            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"), samples3)
+            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}.txt"), samples)
+            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}.txt"), samples2)
+            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}.txt"), samples3)
             print("Theta AR " + str(float(ac)/float(pc)))
             print("X AR " + str(float(ac2)/float(pc2)))
-
+            print(f"alpha reflection rate {int(100*rca/(i+1))}")
+            print(f"beta reflection rate {int(100*rcb/(i+1))}")
+            print(f"out of boundary rate {int(100*bc/(i+1))}")
             print("Last proposal " + str(tt_p) + " with " + str(ss_p))
             print(str(pp_p) + " vs " + str(pp))
-            # if dataset == 'synthetic' and float(ac)/float(pc) <= 0.7 and float(ac)/float(pc) >= 0.4:
-            #     print('Last accepted theta = ',tt)
-            #     theta_step *= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
-            #     print('New theta step = ',theta_step)
-            # elif dataset == 'synthetic' and ((float(ac)/float(pc) > 0.7) or (float(ac)/float(pc) < 0.4)):
-            #     # print('Last accepted theta = ',tt)
-            #     theta_step /= (float(0.1*max(0.01,abs(float(ac)/float(pc)-0.55))))
-            #     print('New theta step = ',theta_step)
 
 if int(0.05*args.mcmc_n) == 0:
     print("Saving")
-    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt"), samples)
-    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt"), samples2)
-    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"), samples3)
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}.txt"), samples)
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}.txt"), samples2)
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}.txt"), samples3)
     print("Theta AR " + str(float(ac)/float(pc)))
     print("X AR " + str(float(ac2)/float(pc2)))
 
@@ -408,14 +414,14 @@ arguments['x_initial'] = list(samples[mcmc_start])
 print('Storing posterior samples')
 
 # Save theta samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples.txt"),samples)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_theta_samples{si.cost_matrix_file_extension}.txt"),samples)
 # Save x samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples.txt"),samples2)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_logsize_samples{si.cost_matrix_file_extension}.txt"),samples2)
 # Save sign samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples.txt"),samples3)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_low_noise_sign_samples{si.cost_matrix_file_extension}.txt"),samples3)
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_low_noise_mcmc_samples_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_low_noise_mcmc_samples{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 print("Done")

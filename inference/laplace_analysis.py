@@ -57,7 +57,7 @@ parser.add_argument("-amax", "--amax",nargs='?',type=float,default =  2.0,
                     help="Minimum alpha parameter for grid search.")
 parser.add_argument("-bmin", "--bmin",nargs='?',type=float,default = 0.0,
                     help="Minimum beta parameter for grid search.")
-parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 100,
+parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 400000,
                     help="Minimum beta parameter for grid search.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.26666666666666666,
                     help="Delta parameter in potential function.")
@@ -228,11 +228,11 @@ arguments['log_likelihood'] = log_likelihood_values[idx]
 arguments['fitted_global_minimum'] = list(minimum_values[idx])
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis_gamma_{str(int(args.gamma))}_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis{si.cost_matrix_file_extension}_gamma_{str(int(args.gamma))}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 # Save log-likelihood values to file
-np.savetxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_laplace_analysis_gamma_{str(int(args.gamma))}.txt'), log_likelihood_values)
+np.savetxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_laplace_analysis{si.cost_matrix_file_extension}_gamma_{str(int(args.gamma))}.txt'), log_likelihood_values)
 
 # Save global minima values to file
 # np.savetxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_laplace_analysis_minima_gamma_{str(int(args.gamma))}.txt'), minimum_values)
@@ -251,7 +251,7 @@ plt.xlabel("Parameter alpha")
 plt.colorbar()
 
 # Save figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis_gamma_{str(int(args.gamma))}.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis{si.cost_matrix_file_extension}_gamma_{str(int(args.gamma))}.png'))
 
 # Show figure if requested
 if args.show_figure:
@@ -268,4 +268,4 @@ ax.set_zlabel("Likelihood")
 ax.set_title('Likelihood of latent posterior variation across parameter space')
 
 # Save figure to file
-plt.savefig(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis_gamma_{str(int(args.gamma))}_3d.png'))
+plt.savefig(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis{si.cost_matrix_file_extension}_gamma_{str(int(args.gamma))}_3d.png'))

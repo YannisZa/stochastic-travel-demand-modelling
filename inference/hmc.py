@@ -40,12 +40,18 @@ sys.path.append(get_project_root())
 parser = argparse.ArgumentParser(description='HMC scheme to sample from posterior of latent variables of the spatial interaction model.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
                     help="Name of dataset (this is the directory name in data/input)")
+parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','sn'],default='',
+                    help="Type of cost matrix used.\
+                        '': Euclidean distance based. \
+                        'sn': Transportation network cost based on A and B roads only. ")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 1.2,
                     help="Alpha parameter in potential function.")
-parser.add_argument("-b", "--beta",nargs='?',type=float,default = 1000,
+parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.3,
                     help="Beta parameter in potential function.")
+parser.add_argument("-bm", "--bmax",nargs='?',type=float,default = 700000,
+                    help="Maximum value for the beta parameter in potential function. This is used to normalise the above argument.")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 100.,
                     help="Gamma parameter in potential function.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.26666666666666666,
@@ -82,7 +88,7 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialInteraction
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise data
 si.normalise_data()
@@ -93,7 +99,7 @@ np.random.seed(888)
 # Set theta for high-noise model's potential value parameters
 theta = [0 for i in range(6)]
 theta[0] = args.alpha
-theta[1] = args.beta#*0.7e2
+theta[1] = args.beta*args.bmax
 theta[2] = args.delta
 theta[3] = args.gamma
 theta[4] = 1 + args.delta*si.M
@@ -229,20 +235,20 @@ for i in tqdm(range(mcmc_n)):
     if int(0.05*args.mcmc_n) > 0:
         if (i+1) % (int(0.05*args.mcmc_n)) == 0:
             print("Saving iteration " + str(i+1))
-            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(theta[0])}.txt"), samples)
+            np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples{si.cost_matrix_file_extension}_{str(theta[0])}.txt"), samples)
             print("X AR:")
             print(ac/pc)
             print("Swap AR:" + str(float(acs)/float(pcs)))
 
 if int(0.05*args.mcmc_n) == 0:
-    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(theta[0])}.txt"), samples)
+    np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples{si.cost_matrix_file_extension}_{str(theta[0])}.txt"), samples)
     print("X AR:")
     print(ac/pc)
     print("Swap AR:" + str(float(acs)/float(pcs)))
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(theta[0])}_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_hmc_samples{si.cost_matrix_file_extension}_{str(theta[0])}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 print("Done")
-print("Data saved to",os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(theta[0])}.txt"))
+print("Data saved to",os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples{si.cost_matrix_file_extension}_{str(theta[0])}.txt"))

@@ -58,6 +58,14 @@ parser.add_argument("-n", "--mcmc_n",nargs='?',type=int,default = 20000,
                     help="Number of MCMC iterations.")
 parser.add_argument("-s", "--mcmc_start",nargs='?',type=int,default = 10000,
                     help="MCMC iteration prior to which all iterations are diregarded.")
+parser.add_argument("-pn", "--p_n",nargs='?',type=int,default = 10,
+                    help="Number of particles used in Annealed importance sampling. ")
+parser.add_argument("-tn", "--t_n",nargs='?',type=int,default = 50,
+                    help="Number of bridging distributions used to create w^{(i)} in Annealed importance sampling. ")
+parser.add_argument("-Lais", "--L_ais",nargs='?',type=int,default = 10,
+                    help="Number steps in leapfrog integrator used as part of HMC within Annealed importance sampling. ")
+parser.add_argument("-eais", "--epsilon_ais",nargs='?',type=float,default = 0.1,
+                    help="Step size in leapfrog integrator used as part of HMC within Annealed importance sampling. ")
 parser.add_argument("-rwsd", "--random_walk_standard_deviation",nargs='?',type=float,default = 0.3,
                     help="Random walk covariance used in Theta proposals.")
 parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 0.02,
@@ -123,13 +131,13 @@ stopping = np.loadtxt(os.path.join(wd,f"data/input/{dataset}/stopping_times.txt"
 
 # Parameters for annealed importance sampling (AIS)
 # Number of samples (w^{(i)}'s) in AIS
-p_n = 10
+p_n = args.p_n
 # Number of bridging distributions used to create w^{(i)}
-t_n = 50
+t_n = args.t_n
 # HMC leapfrog steps
-L = 10
+L = args.L_ais
 # HMC leapfrog stepsize
-eps = 0.1
+eps = args.epsilon_ais
 
 # Annealed importance sampling - returns an importance sampling estimate of z(theta)
 # See Neal, R. M. (1998). Annealed Importance Sampling. Statistics and Computing, 11(2), 125–139. Retrieved from http://arxiv.org/abs/physics/9803008
@@ -323,9 +331,9 @@ samples3 = np.empty(mcmc_n)
 # Decide whether to start new experiment or load old one
 if args.load_experiment:
 
-    theta_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples.txt")
-    logsize_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt")
-    sign_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt")
+    theta_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples{si.cost_matrix_file_extension}.txt")
+    logsize_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples{si.cost_matrix_file_extension}.txt")
+    sign_path = os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples{si.cost_matrix_file_extension}.txt")
 
     if not os.path.exists(theta_path):
         raise Exception('No experiment has been run before. File does not exist in {}')
@@ -335,14 +343,14 @@ if args.load_experiment:
         raise Exception('No experiment has been run before. File does not exist in {}')
 
     # Load updated sample initialisations
-    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples.txt"))
-    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt"))
-    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"))
+    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples{si.cost_matrix_file_extension}.txt"))
+    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples{si.cost_matrix_file_extension}.txt"))
+    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples{si.cost_matrix_file_extension}.txt"))
 else:
     # Load initial sample initialisations
-    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples_initial.txt"))
-    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples_initial.txt"))
-    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples_initial.txt"))
+    samples_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples{si.cost_matrix_file_extension}_initial.txt"))
+    samples2_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples{si.cost_matrix_file_extension}_initial.txt"))
+    samples3_init = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples{si.cost_matrix_file_extension}_initial.txt"))
 
 # Start MCMC chain from specific value
 samples[:mcmc_start+1] = samples_init[:mcmc_start+1]
@@ -512,14 +520,14 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
     # Savedown and output details every 100 iterations
     if (i+1) % 10 == 0:
         print("Saving")
-        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples.txt"), samples)
-        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt"), samples2)
-        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"), samples3)
+        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples{si.cost_matrix_file_extension}_final.txt"), samples)
+        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples{si.cost_matrix_file_extension}_final.txt"), samples2)
+        np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples{si.cost_matrix_file_extension}_final.txt"), samples3)
 
         arguments['last_iteration'] = str(i)
 
         # Save parameters to file
-        with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json'), 'w') as outfile:
+        with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
             json.dump(arguments, outfile)
 
         print("Last proposal" + str(tt_p) + " with " + str(ss_p))
@@ -547,20 +555,20 @@ arguments['last_iteration'] = i
 print('Storing posterior samples')
 
 # Save theta samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples.txt"),samples)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_theta_samples_final.txt"),samples)
 # Save x samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples.txt"),samples2)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_logsize_samples_final.txt"),samples2)
 # Save sign samples to file
-np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples.txt"),samples3)
+np.savetxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_high_noise_sign_samples_final.txt"),samples3)
 
-# Store fixed parameters to arguments
-arguments['p_n_AIS'] = p_n
-arguments['t_n_AIS'] = t_n
-arguments['L_AIS'] = L
-arguments['eps_AIS'] = eps
+# # Store fixed parameters to arguments
+# arguments['p_n_AIS'] = p_n
+# arguments['t_n_AIS'] = t_n
+# arguments['L_AIS'] = L
+# arguments['eps_AIS'] = eps
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_final_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 print("Done")

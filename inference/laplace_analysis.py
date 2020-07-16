@@ -54,11 +54,11 @@ parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','
 parser.add_argument("-amin", "--amin",nargs='?',type=float,default = 0.0,
                     help="Minimum alpha parameter for grid search.")
 parser.add_argument("-amax", "--amax",nargs='?',type=float,default =  2.0,
-                    help="Minimum alpha parameter for grid search.")
+                    help="Maximum alpha parameter for grid search.")
 parser.add_argument("-bmin", "--bmin",nargs='?',type=float,default = 0.0,
                     help="Minimum beta parameter for grid search.")
-parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 400000,
-                    help="Minimum beta parameter for grid search.")
+parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 1400000.0,
+                    help="Maximum beta parameter for grid search.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.26666666666666666,
                     help="Delta parameter in potential function.")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 100.,

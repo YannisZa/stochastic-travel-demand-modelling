@@ -158,6 +158,7 @@ def z_inverse(params):
 # MCMC tuning parameters
 # Randomwalk covariance
 Ap = np.array([[ 0.00749674,  0.00182529], [ 0.00182529,  0.00709968]])
+# Ap = np.array([[0.00749674, 0.00182529],[0.00182529, 0.00309968]])
 # Ap = np.array([[0.01025014, 0.00018253],[0.00018253, 0.01025014]])
 
 # Number of leapfrog steps
@@ -404,9 +405,9 @@ x_mean = np.mean(samples2,axis=0)
 print(f'Theta = {theta_mean} +/- {theta_sd}')
 
 # Saving summary statistics to arguments
-arguments['theta_mean'] = list(theta_mean)
-arguments['theta_sd'] = list(theta_sd)
-arguments['x_mean'] = list(x_mean)
+# arguments['theta_mean'] = list(theta_mean)
+# arguments['theta_sd'] = list(theta_sd)
+# arguments['x_mean'] = list(x_mean)
 arguments['theta_initial'] = list(samples[mcmc_start])
 arguments['x_initial'] = list(samples[mcmc_start])
 

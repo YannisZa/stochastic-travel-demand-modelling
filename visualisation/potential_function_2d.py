@@ -49,8 +49,6 @@ parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.3,
                     help="Delta parameter")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 20.,
                     help="Gamma parameter")
-parser.add_argument("-k", "--kappa",nargs='?',type=float,default = 1.,
-                    help="Kappa parameter")
 parser.add_argument("-e", "--epsilon",nargs='?',type=float,default = 1.,
                     help="Epsilon parameter")
 parser.add_argument("-s", "--show_figure",nargs='?',type=bool,default = False,
@@ -76,7 +74,7 @@ dataset = args.dataset_name
 constrained = args.constrained
 
 # Define mode (stochastic/determinstic) based on delta value
-if args.delta == 0:
+if int(args.gamma) >= 10000:
     mode = 'deterministic'
 else:
     mode = 'stochastic'
@@ -105,9 +103,9 @@ si.N, si.M = np.shape(si.cost_matrix)
 # Define parameters
 alpha_values = np.array(args.alphas)
 beta = args.beta
-delta = args.delta/si.M
+delta = args.delta
 gamma = args.gamma
-kappa = args.kappa + delta*si.M # this is Equation (2.25)
+kappa = 1.0 + delta*si.M # this is Equation (2.25)
 epsilon = args.epsilon
 theta = np.array([alpha_values[0], beta, delta, gamma, kappa, epsilon])
 grid_size = args.grid_size
@@ -118,7 +116,21 @@ xx, yy = np.meshgrid(space, space)
 zz = np.zeros((grid_size, grid_size))
 
 # Run plots
-plt.figure(figsize=(12,3))
+plt.rcParams['text.latex.preamble']=[r"\usepackage{lmodern}"]
+# Options
+params = {'text.usetex' : True,
+          'font.size' : 20,
+          'legend.fontsize': 20,
+          'legend.handlelength': 2,
+          'font.family' : 'sans-serif',
+          'font.sans-serif':['Helvetica'],
+          'text.latex.unicode': True
+          }
+plt.rcParams.update(params)
+plt.style.use('classic')
+
+# plt.figure(figsize=(12,3))
+fig, axes = plt.subplots(nrows=1, ncols=len(alpha_values),figsize=(12,3))
 for k in tqdm(range(len(alpha_values))):
     # Create a new subplot
     plt.subplot(1, len(alpha_values), k+1)
@@ -134,21 +146,23 @@ for k in tqdm(range(len(alpha_values))):
             # zz[i, j] = np.exp(-si.potential_value(temp,theta)[0])
 
     # Create a contour
-    plt.contourf(xx, yy, zz, 300)
+    im = plt.contourf(xx, yy, zz, 300)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.xlim([space0, space1])
     plt.ylim([space0, space1])
     plt.xticks([])
     plt.yticks([])
     # Extra settings - omit when generating nice plots for reports
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-    plt.title('a = {}'.format(alpha_values[k]))
-    plt.colorbar()
+    plt.xlabel(r'$x_1$',fontsize=16)
+    plt.ylabel(r'$x_2$',fontsize=16)
+    plt.title(r'$\alpha = {}$'.format(alpha_values[k]),fontsize=18)
 
 # Extra settings - omit when generating nice plots for reports
-plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gamma,kappa)), y=1.30,x=-1)
+# plt.title(('beta = {}, delta = {}, gamma = {}, kappa = {}'.format(beta,delta,gamma,kappa)), y=1.30,x=-1)
 # Use next line when generating nice plots for reports
+fig.subplots_adjust(right=0.8)
+cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7]) #fig.add_axes([0.85, 0.15, 0.05, 0.7])
+fig.colorbar(im,cax=cbar_ax)
 # plt.tight_layout()
 
 # Save figure to output

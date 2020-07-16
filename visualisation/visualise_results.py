@@ -7,6 +7,7 @@ import sys
 import json
 import argparse
 import numpy as np
+import geopandas as gpd
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
@@ -51,10 +52,11 @@ parser.add_argument("-r", "--result",nargs='?',type=str,choices=['low_noise','hi
                         hmc: Statistics from HMC \
                         opt: Optimal statistics \
                         ")
-parser.add_argument("-lf", "--latent_factor",nargs='?',type=int,default=100,
+parser.add_argument("-lf", "--latent_factor",nargs='?',type=int,default=10000,
                     help="Factor used to scale latent destination sizes for visualisation.")
 parser.add_argument("-af", "--actual_factor",nargs='?',type=int,default=1000,
                     help="Factor used to scale actual destination demand or origin supply for visualisation.")
+parser.add_argument('-p', '--plot', action='store_true')
 parser.add_argument('-hide', '--hide', action='store_true')
 args = parser.parse_args()
 # Print arguments
@@ -65,6 +67,9 @@ if not args.hide:
 dataset = args.dataset_name
 # Define type of spatial interaction model
 constrained = args.constrained
+
+# Load london boundary
+london_boundary = gpd.read_file(os.path.join(wd,'data/input/misc/london_boundary.geojson'))
 
 # Import selected type of spatial interaction model
 if constrained == 'singly':
@@ -123,13 +128,13 @@ plt.rcParams.update(params)
 # Figure number
 j = 0
 
-plt.figure(j)
-if constrained == 'doubly':
-    plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='b',edgecolors='b',s=latent_factor*destination_demand, alpha=0.5,label='Dest demands')
-else:
-    plt.scatter(origin_locs[:, 0], origin_locs[:, 1], color='b',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
-plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r',edgecolors='r',s=actual_factor*np.exp(xd),label='Actual dest sizes')
-plt.legend()
+# plt.figure(j)
+# if constrained == 'doubly':
+#     plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='b',edgecolors='b',s=latent_factor*destination_demand, alpha=0.5,label='Dest demands')
+# else:
+#     plt.scatter(origin_locs[:, 0], origin_locs[:, 1], color='b',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
+# plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r',edgecolors='r',s=actual_factor*np.exp(xd),label='Actual dest sizes')
+# plt.legend()
 
 if args.result == 'low_noise':
     # Low noise stats
@@ -140,7 +145,6 @@ if args.result == 'low_noise':
     # Import arguments
     with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_low_noise_mcmc_samples_parameters.json')) as infile:
         arguments = json.load(infile)
-
 
     j+=1
     plt.figure(j)
@@ -253,42 +257,57 @@ elif args.result == 'high_noise':
 
 elif args.result == 'hmc':
     # HMC plots
+
+    sample_indices = [1,100,200,300]
     for alpha in tqdm([0.5,1.0,1.5,2.0]):
-        # Import latent posterior samples
-        samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(alpha)}.txt"))
+        for i in range(1,5):
+            # Import latent posterior samples
+            samples = np.loadtxt(os.path.join(wd,f"data/output/{dataset}/inverse_problem/{constrained}_hmc_samples_{str(alpha)}.txt"))
 
-        # Import arguments
-        with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_high_noise_mcmc_samples_parameters.json')) as infile:
-            arguments = json.load(infile)
+            xx = samples[-(sample_indices[i-1])]
 
-        xx = samples[-1]
-        j += 1
+            fig,ax = plt.subplots(1,1,figsize=(20,20))
+            ax.set_title(rf"$\alpha = {alpha}$, draw $ = {str(i)}$ ",fontsize=30)
+            if constrained == 'doubly':
+                ax.scatter(destination_locs[:, 0], destination_locs[:, 1], edgecolors='b',s=actual_factor*destination_demand,label=r'$D_j$')
+            else:
+                ax.scatter(origin_locs[:, 0], origin_locs[:, 1],color='b',edgecolors='b',s=actual_factor*origin_supply,label=r'$O_i$')
+            ax.scatter(destination_locs[:, 0], destination_locs[:, 1],color='r',edgecolors='r', s=latent_factor*np.exp(xx),label=r'$W_j$')
+            lgnd = ax.legend(loc="upper right", scatterpoints=1, fontsize=20)
+            for l in range(len(lgnd.legendHandles)):
+                lgnd.legendHandles[l]._sizes = [120]
+            ax.set_yticks([])
+            ax.set_xticks([])
+            ax.set_xlabel('Longitude',fontsize=20)
+            ax.set_ylabel('Longitude',fontsize=20)
+            london_boundary.boundary.plot(edgecolor='black',ax=ax,alpha=0.3)
+            # fig.tight_layout()
 
-        plt.figure(j)
-        plt.title(rf"Latent size posterior for $\alpha = {alpha}$")
-        if constrained == 'doubly':
-            plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='w',edgecolors='b',s=actual_factor*destination_demand, alpha=0.5,label='Dest demands')
-        else:
-            plt.scatter(origin_locs[:, 0], origin_locs[:, 1], color='w',edgecolors='b',s=actual_factor*origin_supply, alpha=0.5,label='Origin supply')
-        plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='w',edgecolors='r', s=latent_factor*np.exp(xx),label='Latent dest sizes')
-        plt.legend()
-
-        plt.savefig(os.path.join(wd,f"data/output/{dataset}/inverse_problem/figures/{constrained}_hmc_samples_{str(alpha)}.png"))
+            plt.savefig(os.path.join(wd,f"data/output/{dataset}/inverse_problem/figures/{constrained}_hmc_samples_{str(alpha)}_draw_{str(i)}.png"),
+                        dpi=1000,
+                        bbox_inches='tight',
+                        transparent=True)
         print('alpha=',str(alpha),'ended...')
 
 
 elif args.result == 'opt':
     # Opt plots
     for alpha in tqdm([0.5, 1.0, 1.5, 2.0]):
-        xx = np.loadtxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_optimal_latent_posterior_{str(alpha)}.txt'))
-        j += 1
-        plt.figure(j)
-        plt.title(r"Optimal latent posterior for $\alpha$ =" + str(alpha))
-        plt.scatter(origin_locs[:, 0], origin_locs[:, 1], s=latent_factor*origin_supply, alpha=0.5)
-        plt.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r', s=actual_factor*np.exp(xx))
-        plt.xlabel('Longitude')
-        plt.ylabel('Latitude')
-        plt.savefig(os.path.join(wd,f"data/output/{dataset}/laplace/figures/{constrained}_optimal_latent_posterior_{str(alpha)}.png"))
+        xx = np.loadtxt(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_optimal_latent_posterior_{str(alpha)}.txt'))
+
+        fig,ax = plt.subplots(1,1,figsize=(30,30))
+        ax.set_title(rf"$\alpha = {alpha}$")
+        ax.scatter(origin_locs[:, 0], origin_locs[:, 1], s=actual_factor*origin_supply, alpha=0.5)
+        ax.scatter(destination_locs[:, 0], destination_locs[:, 1], color='r', s=latent_factor*np.exp(xx))
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        london_boundary.boundary.plot(edgecolor='black',ax=ax,alpha=0.3)
+
+        plt.savefig(os.path.join(wd,f"data/output/{dataset}/inverse_problem/figures/{constrained}_optimal_latent_posterior{si.cost_matrix_file_extension}_{str(alpha)}.png"),
+            dpi=1000,
+            bbox_inches='tight',
+            transparent=True)
         print('alpha=',str(alpha),'ended...')
 
-plt.show()
+if args.plot:
+    plt.show()

@@ -5,6 +5,172 @@
 
 
 // Computes flow estimates using the Iterative proportional filtering procedure - see page 373 of "Gravity Models of Spatial Interaction Behavior" book.
+double *infer_flows_ipf_procedure_singly(double *flows,
+                                const double *orig_supply,
+                                const double *cost_mat,
+                                const double *w_vec,
+                                double *A_vec,
+                                double *B_vec,
+                                const size_t n,
+                                const size_t m,
+                                const double *theta,
+                                const size_t max_iters,
+                                const double tolerance,
+                                const bool show_flows) {
+
+    /*
+    orig_supply [array]: supply generated at each origin zone
+    cost_mat [array]: matrix of costs travelling from each origin to each destination
+    w_vec [array]: array of "sizes" (e.g. emissions) at each destination
+    n [int]: number of origin zones
+    m [int]: number of destination zones
+    theta [array]: parameters of model
+      theta[0]: alpha - parameter controlling effect of destination sizes on flow update
+      theta[1]: beta - parameter controlling effect of cost matrix on the flow update
+    max_iters [int]: maximum iterations for which system of equations should be solved
+    show_params [boolean]: flag for printing parameter matrices A and B
+    show_flows [boolean]: flag for printing flow from each origin to each destination
+    */
+
+
+    size_t i,ii,j,jj;
+    unsigned int t;
+    double temp,error,dest_error,orig_error;
+    double estimated_orig[n];
+    double estimated_dest[m];
+
+
+    // Unpack parameter vector
+    double alpha = theta[0];
+    double beta = theta[1];
+    double kappa = theta[4];
+
+    printf("alpha ");
+    printf("%f\n",alpha);
+    printf("beta ");
+    printf("%f\n",beta);
+    printf("kappa ");
+    printf("%f\n",kappa);
+
+    // Initialise flows
+    // See equation (5.61) page 373 from Gravity Models of Spatial Interaction Behavior book
+    for(i=0; i<n; i++) {
+
+        for(j=0; j<m; j++) {
+          // Assume Q_j = P_i = 1 for all i,j
+          flows[i*m + j] = 1; // exp(-beta*cost_mat[i*m + j]);
+        }
+    }
+
+    // Solve iteratively  'max_iters' times
+    dest_error = INFINITY;
+    orig_error = INFINITY;
+
+    // Update flows until errors are minimised
+    t = 0;
+    while ( (dest_error > m*tolerance || orig_error > n*tolerance) & (t < max_iters) ){
+
+        // Loop over origins and reset total flow inferred
+        for(i=0; i<n; i++) {
+            // Loop over destinations
+            for(j=0; j<m; j++) {
+                // To avoid creating (max_iters)x(N) and (max_iters)x(M) A and B matrices
+                // that overload memmory, 1xN and 1xM A and B matrices are created, respectively.
+                // Size 1 comes from the fact that the depth of recursion is 1
+
+                // Update A vector
+                // A_{i}^{(2r-1)} &= ( \sum_{j=1}^M W_j^{\alpha}B_j^{(2r)} \exp(-\beta c_{ij}) ) ^ {-1}
+                temp = 0.;
+                for (jj=0; jj<m; jj++) {
+                  temp += pow(w_vec[jj],alpha)*B_vec[jj]*exp(-beta*cost_mat[i*m + jj]);
+                }
+                A_vec[i] = 1. / temp;
+
+                // Update B vector
+                // B_{j}^{(2r)} &= (\kappa W_j^{1-\alpha}) * (\sum_{i=1}^N O_iA_i^{(2r-1)} \exp(-\beta c_{ij}))^{-1}
+                temp = 0.;
+                for (ii=0; ii<n; ii++) {
+                  temp += orig_supply[ii]*A_vec[ii]*exp(-beta*cost_mat[ii*m + j]);
+                }
+                temp = pow(w_vec[j],alpha)*temp;
+                B_vec[j] =  kappa*pow(w_vec[j],1-alpha) / temp;
+
+
+                // Update flows
+                // Compute flows T_{ij} = A_i B_j O_i W_j^{\alpha} \exp(-\beta c_{ij})
+                flows[i*m + j] = A_vec[i]*B_vec[j]*orig_supply[i]*pow(w_vec[j],alpha)*exp(-beta*cost_mat[i*m + j]);
+
+                // Print statements
+                if (show_flows == 1) {
+                    printf("Flow");
+                    printf("[");
+                    printf("%zu",i);
+                    printf(",");
+                    printf("%zu",j);
+                    printf("]:  ");
+                    printf("%f",flows[i*m + j]);
+                    printf("\n");
+                }
+            }
+        }
+
+        // Update estimated origin supplies
+        for(ii=0; ii<n; ii++) {
+          temp = 0;
+          for(jj=0; jj<m; jj++) {
+            temp += flows[ii*m + jj];
+          }
+          // printf("------------------------\n");
+          // printf("Estimated origin[");
+          // printf("%zu]: ",ii);
+          // printf("%f\n",temp);
+
+          estimated_orig[ii] = temp;
+        }
+        // Update estimated destination demands
+        for(jj=0; jj<m; jj++) {
+          temp = 0;
+          for(ii=0; ii<n; ii++) {
+            temp += flows[ii*m + jj];
+          }
+          // printf("------------------------\n");
+          // printf("Estimated demand[");
+          // printf("%zu]: ",jj);
+          // printf("%f\n",temp);
+
+          estimated_dest[jj] = temp;
+        }
+        // Compute total error E = \sum_{i=1}^N abs(O_i-\hat{O_i}) + \sum_{j=1}^M abs(D_j-\hat{D_j})
+        error = 0;
+        dest_error = 0;
+        orig_error = 0;
+        for(ii=0; ii<n; ii++) {
+            // Compute origin error \sum_{i=1}^N abs(O_i-\hat{O_i})
+            orig_error += fabs(estimated_orig[ii]-orig_supply[ii]);
+        }
+        for(jj=0; jj<m; jj++) {
+            // Compute destination error \sum_{i=1}^N abs(O_i-\hat{O_i})
+            dest_error += fabs(estimated_dest[jj]-kappa*w_vec[jj]);
+        }
+        // Total error
+        error = dest_error + orig_error;
+
+        printf("------------------------\n");
+        printf("Origin error: ");
+        printf("%f\n",orig_error);
+        printf("Destination error: ");
+        printf("%f\n",dest_error);
+        printf("Total error: ");
+        printf("%f\n",error);
+
+        // Increment number of iterations
+        t++;
+
+    }
+    return flows;
+}
+
+// Computes flow estimates using the Iterative proportional filtering procedure - see page 373 of "Gravity Models of Spatial Interaction Behavior" book.
 double *infer_flows_ipf_procedure(double *flows,
                                 const double *orig_supply,
                                 const double *dest_demand,

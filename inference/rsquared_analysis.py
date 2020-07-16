@@ -53,7 +53,7 @@ parser.add_argument("-amax", "--amax",nargs='?',type=float,default =  2.0,
                     help="Minimum alpha parameter for grid search.")
 parser.add_argument("-bmin", "--bmin",nargs='?',type=float,default = 0.0,
                     help="Minimum beta parameter for grid search.")
-parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 400000,
+parser.add_argument("-bmax", "--bmax",nargs='?',type=float,default = 1400000.0,
                     help="Minimum beta parameter for grid search.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.3,
                     help="Delta parameter.")
@@ -187,7 +187,7 @@ arguments['R^2'] = r2_values[idx]
 arguments['potential'] = potentials[idx]
 
 # Save parameters to file
-if not rgs.plot_results:
+if not args.plot_results:
     with open(os.path.join(wd,f'data/output/{dataset}/r_squared/figures/{constrained}_{mode}_rsquared_analysis{si.cost_matrix_file_extension}_parameters.json'), 'w') as outfile:
         json.dump(arguments, outfile)
 

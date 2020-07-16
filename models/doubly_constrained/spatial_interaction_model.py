@@ -39,17 +39,23 @@ class SpatialInteraction():
 
     """
 
-    def __init__(self,dataset:str='commuter'):
+    def __init__(self,dataset,cost_matrix_type=''):
         '''  Constructor '''
 
+        # Define dataset
+        self.dataset = dataset
         # Define working directory
         self.working_directory = self.get_project_root()
         # Define data directory
         self.data_directory = os.path.join(self.working_directory,'data/input/{}'.format(dataset))
-        # Load C function
-        self.load_c_functions()
+        # Store cost matrix file extenstion
+        self.cost_matrix_file_extension = ''
+        if cost_matrix_type == 'sn':
+            self.cost_matrix_file_extension = '_small_network'
         # Import data
         self.import_data()
+        # Load C functions
+        self.load_c_functions()
 
     # Get current working directory and project root directory
     def get_project_root(self):
@@ -111,8 +117,6 @@ class SpatialInteraction():
         self.origin_supply = np.loadtxt(originsupply_file,ndmin=1).astype('float64')
 
         # In case origin supply is not a list
-        print(type(self.origin_supply))
-        print(self.origin_supply.shape)
         if not isinstance(self.origin_supply,(np.ndarray, np.generic)):
             self.origin_supply = np.array([self.origin_supply])
 
@@ -302,6 +306,22 @@ class SpatialInteraction():
                                                     ctypes.c_bool]
 
         # Load Iterative proportional filtering procedure flow inference
+        self.infer_flows_ipf_procedure_singly = lib.infer_flows_ipf_procedure_singly
+        self.infer_flows_ipf_procedure_singly.restype = ctypes.c_double
+        self.infer_flows_ipf_procedure_singly.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_size_t,
+                                                    ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
+                                                    ctypes.c_size_t,
+                                                    ctypes.c_double,
+                                                    ctypes.c_bool]
+
+        # Load potential function
         self.potential_stochastic = lib2.potential_stochastic
         self.potential_stochastic.restype = ctypes.c_double
         self.potential_stochastic.argtypes = [ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),

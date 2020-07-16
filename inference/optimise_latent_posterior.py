@@ -44,12 +44,18 @@ sys.path.append(get_project_root())
 parser = argparse.ArgumentParser(description='Optimiser for the latent posterior given set of parameters.')
 parser.add_argument("-data", "--dataset_name",nargs='?',type=str,choices=['commuter_borough','commuter_ward','retail','transport','synthetic'],default = 'synthetic',
                     help="Name of dataset (this is the directory name in data/input)")
+parser.add_argument("-cm", "--cost_matrix_type",nargs='?',type=str,choices=['','sn'],default='',
+                    help="Type of cost matrix used.\
+                        '': Euclidean distance based. \
+                        'sn': Transportation network cost based on A and B roads only. ")
 parser.add_argument("-c", "--constrained",nargs='?',type=str,choices=['singly','doubly'],default='singly',
                     help="Type of potential function to evaluate (corresponding to the singly or doubly constrained spatial interaction model). ")
 parser.add_argument("-a", "--alpha",nargs='?',type=float,default = 1.2,
                     help="Alpha parameter in potential function.")
-parser.add_argument("-b", "--beta",nargs='?',type=float,default = 6.469646964696469,
+parser.add_argument("-b", "--beta",nargs='?',type=float,default = 0.3,
                     help="Beta parameter in potential function.")
+parser.add_argument("-bm", "--bmax",nargs='?',type=float,default = 700000,
+                    help="Maximum value for the beta parameter in potential function. This is used to normalise the above argument.")
 parser.add_argument("-d", "--delta",nargs='?',type=float,default = 0.26666666666666666,
                     help="Delta parameter in potential function.")
 parser.add_argument("-g", "--gamma",nargs='?',type=float,default = 10000.,
@@ -82,18 +88,18 @@ else:
 wd = get_project_root()
 
 # Instantiate SpatialInteraction
-si = SpatialInteraction(dataset)
+si = SpatialInteraction(dataset,args.cost_matrix_type)
 
 # Normalise data
 si.normalise_data()
 
 # Fix random seed
-np.random.seed(888)
+# np.random.seed(888)
 
 # Set theta for high-noise model's potential value parameters
 theta = [0 for i in range(6)]
 theta[0] = args.alpha
-theta[1] = args.beta
+theta[1] = args.beta*args.bmax
 theta[2] = args.delta
 # Set gamma for Laplace optimisation
 theta[3] = args.gamma
@@ -102,11 +108,9 @@ theta[5] = 1 # this is the potential values epsilon parameter which is assumed t
 # Convert to np array
 theta = np.array(theta)
 
-# Get log destination sizes
-xd = si.normalised_initial_destination_sizes
-
 # Run optimization
-minimum = xd
+# Get log destination sizes
+minimum = si.normalised_initial_destination_sizes
 minimum_potential = np.infty
 for k in range(si.M):
     delta = theta[2]
@@ -118,8 +122,8 @@ for k in range(si.M):
         minimum = f.x
 
 # Save parameters to file
-with open(os.path.join(wd,f'data/output/{dataset}/laplace/figures/{constrained}_laplace_analysis_gamma_{str(int(args.gamma))}_parameters.json'), 'w') as outfile:
+with open(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_optimal_lantent_posterior{si.cost_matrix_file_extension}_{str(theta[0])}_parameters.json'), 'w') as outfile:
     json.dump(arguments, outfile)
 
 # Save optimal log destination sizes
-np.savetxt(os.path.join(wd,f'data/output/{dataset}/laplace/{constrained}_optimal_latent_posterior_{str(theta[0])}.txt'),minimum)
+np.savetxt(os.path.join(wd,f'data/output/{dataset}/inverse_problem/{constrained}_optimal_latent_posterior{si.cost_matrix_file_extension}_{str(theta[0])}.txt'),minimum)

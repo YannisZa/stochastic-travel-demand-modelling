@@ -6,7 +6,7 @@ This repository contains code for Bayesian calibration of the deterrministic Har
 
 Before running any python script please run ```chmod +x ./setup.sh ``` and then ``` ./setup.sh ```. This bash script installs python requirements, sets up necessary directories etc.
 
-This repository is a work in progress. The following tasks have to be completed
+This repository is a work in progress. The following tasks have to be completed:
 - [ ] Make doubly constrained spatial interaction model class compatible to the singly constrained model class.
 - [ ] Complete `generate_figures.sh` script.
 - [ ] Improve comments on model classes and argsparse descriptions in inference classes.

@@ -2,7 +2,7 @@
 
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
-This repository contains code for Bayesian calibration of the stochastic extension of the Harris Wilson ordinary differential equations. The differential equations are defined based on a singly or doubly constrained spatial interaction model of urban transport. The code was based on this [repository](https://github.com/lellam/cities_and_regions) and was created for the purposes of my MRes thesis at the University of Cambridge. My thesis will be released soon on my [website](https://yannisza.github.io/).
+This repository contains code for Bayesian calibration of the stochastic extension of the Harris Wilson ordinary differential equations. The differential equations are defined based on a singly or doubly constrained spatial interaction model of urban transport. The code was based on this [repository](https://github.com/lellam/cities_and_regions) and was created for the purposes of my MRes thesis at the University of Cambridge. My thesis can be found on my [website](https://yannisza.github.io/research/stochastic-modelling-of-urban-travel-demand/).
 
 Before running any python script please run ```chmod +x ./setup.sh ``` and then ``` ./setup.sh ```. This bash script installs python requirements, sets up necessary directories etc.
 

@@ -96,7 +96,7 @@ si.normalise_data()
 # Fix random seed
 # np.random.seed(888)
 
-# Set theta for high-noise model's potential value parameters
+# Set theta for low-noise model's potential value parameters
 theta = [0 for i in range(6)]
 theta[0] = args.alpha
 theta[1] = args.beta*args.bmax

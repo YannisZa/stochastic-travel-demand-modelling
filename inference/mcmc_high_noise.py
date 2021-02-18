@@ -275,7 +275,7 @@ def unbiased_z_inv(cc):
     # For the choice of stoppping time
     for i in range(0, K+1):
         # Compute increasing average estimator
-        # log (\nu_i) = \log(i+1) - \log(\sum_{j=0}^{i} w^{(j)}))
+        # \log (\nu_i) = \log(i+1) - \log(\sum_{j=0}^{i} w^{(j)}))
         ln_Y[i] = np.log(i+1) - logsumexp(log_weights[:i+1])
 
     # Store \nu_0
@@ -283,7 +283,7 @@ def unbiased_z_inv(cc):
     # For the choice of stoppping time
     for i in range(1, K+1):
         # Note that Pr(T\geq i) \propto \log(i^{-1.1})
-        # Compute \log(\nu_i) - \log(i^{-1.1}) = \log(\nu_i) + \log(i^{1.1})
+        # Compute \log(\nu_i) - \log(i^{-1.1}) = \log(\nu_i) + 1.1\log(i)
         # Note that for i = 0 ln_Y_pos[0] = \nu_0
         ln_Y_pos[i] = ln_Y[i] + k_pow*np.log(i)
         # Compute \log(\nu_{i-1}) - \log(i^{-1.1}) = \log(\nu_i) + \log(i^{1.1})
@@ -488,7 +488,7 @@ for i in tqdm(range(mcmc_start, mcmc_n)):
         # Compute log updated potential energy and its derivarive weighted by the likelihood function \pi(y|x)
         # \log(\exp(-\gamma)V_{\theta}(xx)) + \log(\pi(y|x))
         W_p, gradW_p = V_p + VL_p, gradV_p + gradVL_p
-        # Make a full step for the momentum except at the end of trajectory
+        # Make a half step for the momentum except at the end of trajectory
         p_p = p_p - 0.5*eps2*gradW_p
 
 
